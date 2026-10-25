@@ -1,0 +1,158 @@
+@model Staybnb.Models.HostApplication
+
+@{
+    ViewData["Title"] = "My Host Application";
+}
+
+<div class="container py-5">
+
+    <div class="mb-4">
+        <h1>My Host Application</h1>
+
+        <p class="text-muted">
+            View the latest status of your property application.
+        </p>
+    </div>
+
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert alert-info" role="alert">
+            @message
+        </div>
+    }
+
+    @if (Model == null)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-4 text-center">
+
+                <h4>You haven't submitted an application yet.</h4>
+
+                <p class="text-muted">
+                    Submit your property details to begin the host approval process.
+                </p>
+
+                <a asp-controller="HostApplications"
+                   asp-action="Create"
+                   class="btn btn-primary">
+                    Apply to Become a Host
+                </a>
+
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+
+                <div class="d-flex justify-content-between
+                            align-items-start flex-wrap gap-3">
+
+                    <div>
+                        <h3>@Model.Title</h3>
+
+                        <p class="text-muted mb-1">
+                            @Model.City · @Model.PropertyType
+                        </p>
+
+                        <p class="text-muted">
+                            Submitted on
+                            @Model.SubmittedAt.ToLocalTime().ToString("dd MMMM yyyy")
+                        </p>
+                    </div>
+
+                    @if (Model.Status == "Pending")
+                    {
+                        <span class="badge bg-warning text-dark">
+                            Pending Review
+                        </span>
+                    }
+                    else if (Model.Status == "Approved")
+                    {
+                        <span class="badge bg-success">
+                            Approved
+                        </span>
+                    }
+                    else if (Model.Status == "Rejected")
+                    {
+                        <span class="badge bg-danger">
+                            Rejected
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            @Model.Status
+                        </span>
+                    }
+
+                </div>
+
+                <hr />
+
+                <h5>Property Description</h5>
+
+                <p>@Model.Description</p>
+
+                <h5>Address</h5>
+
+                <p>@Model.Address, @Model.City</p>
+
+                <h5>Price Per Night</h5>
+
+                <p>
+                    @Model.PricePerNight.ToString(
+                        "C",
+                        new System.Globalization.CultureInfo("en-ZA"))
+                </p>
+
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    <h5 class="mt-4">Uploaded Images</h5>
+
+                    <div class="row g-3">
+                        @foreach (var image in Model.Images)
+                        {
+                            <div class="col-md-4 col-sm-6">
+                                <img src="@image.ImagePath"
+                                     alt="Property image"
+                                     class="img-fluid rounded border"
+                                     style="width: 100%; height: 200px; object-fit: cover;" />
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (Model.Status == "Pending")
+                {
+                    <div class="alert alert-info mt-4 mb-0">
+                        Your application is awaiting administrator review.
+                    </div>
+                }
+                else if (Model.Status == "Approved")
+                {
+                    <div class="alert alert-success mt-4 mb-0">
+                        Your application has been approved.
+                    </div>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <div class="alert alert-danger mt-4 mb-0">
+                        Your application was rejected.
+                    </div>
+                }
+
+            </div>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-controller="Properties"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Properties
+        </a>
+    </div>
+
+</div>

@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-5">
+
+                    <h1 class="display-4 fw-bold">403</h1>
+
+                    <h2 class="h4 mb-3">Access Denied</h2>
+
+                    <p class="text-muted mb-4">
+                        You don't have permission to access this page.
+                        Please return to the homepage or sign in with
+                        an account that has the required permissions.
+                    </p>
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-dark">
+                        Return Home
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

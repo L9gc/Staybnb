@@ -1,0 +1,25 @@
+
+# Build output
+
+bin/
+obj/
+.vs/
+.vscode/
+
+# User-specific files
+
+*.user
+*.suo
+
+# Application settings containing secrets
+
+appsettings.Development.json
+
+# Logs
+
+*.log
+
+# Operating system files
+
+Thumbs.db
+.DS_Store

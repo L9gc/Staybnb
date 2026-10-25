@@ -1,0 +1,90 @@
+@model IEnumerable<Staybnb.Models.Property>
+
+@{
+ViewData["Title"] = "Explore Properties";
+}
+
+<div class="container py-4">
+    <div class="mb-5">
+        <p class="text-uppercase text-muted fw-semibold small mb-2">
+            Find your next stay
+        </p>
+
+    <h1 class="display-5 fw-bold">Explore Properties</h1>
+
+    <p class="text-muted">
+        Discover places to stay for your next trip, getaway, or adventure.
+    </p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 border rounded-4">
+        <h2 class="h4">No properties available yet</h2>
+
+        <p class="text-muted mb-0">
+            We're preparing new places for you to explore.
+            Please check back soon.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var property in Model)
+        {
+            <div class="col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+
+                    @if (property.Images.Any())
+                    {
+                        <img src="@property.Images.First().ImagePath"
+                             class="card-img-top"
+                             alt="@property.Title"
+                             style="height: 230px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light"
+                             style="height: 230px;">
+                            <span class="text-muted">No image available</span>
+                        </div>
+                    }
+
+                    <div class="card-body p-4">
+                        <p class="small text-muted mb-2">
+                            @property.City · @property.PropertyType
+                        </p>
+
+                        <h2 class="h5 fw-bold">@property.Title</h2>
+
+                        <p class="text-muted">
+                            @(
+                                property.Description.Length > 100
+                                    ? property.Description[..100] + "..."
+                                    : property.Description
+                            )
+                        </p>
+
+                        <p class="mb-3">
+                            <strong>
+                                @property.PricePerNight.ToString("C", 
+                                    System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
+                            </strong>
+                            <span class="text-muted"> / night</span>
+                        </p>
+
+                        <a asp-controller="Properties"
+                           asp-action="Details"
+                           asp-route-id="@property.Id"
+                           class="btn btn-dark w-100">
+                            View Property
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+</div>

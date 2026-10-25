@@ -1,0 +1,119 @@
+@model Staybnb.Models.Property
+
+@{
+ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-4">
+    <a asp-controller="Properties"
+       asp-action="Index"
+       class="text-decoration-none text-muted">
+        &larr; Back to properties
+    </a>
+
+<div class="mt-4 mb-4">
+    <h1 class="display-5 fw-bold">@Model.Title</h1>
+
+    <p class="text-muted">
+        @Model.City, @Model.Address
+    </p>
+</div>
+
+@if (Model.Images.Any())
+{
+    <div class="row g-3 mb-5">
+        @foreach (var image in Model.Images)
+        {
+            <div class="col-md-6">
+                <img src="@image.ImagePath"
+                     alt="@Model.Title"
+                     class="img-fluid rounded-4 w-100"
+                     style="height: 300px; object-fit: cover;" />
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-5"
+         style="height: 300px;">
+        <p class="text-muted mb-0">No property images available yet.</p>
+    </div>
+}
+
+<div class="row g-5">
+    <div class="col-lg-8">
+        <h2 class="h4 fw-bold mb-3">About this property</h2>
+
+        <p>@Model.Description</p>
+
+        <hr class="my-4" />
+
+        <h2 class="h5 fw-bold mb-3">Property information</h2>
+
+        <p>
+            <strong>Property type:</strong>
+            @Model.PropertyType
+        </p>
+
+        <p>
+            <strong>Location:</strong>
+            @Model.City
+        </p>
+
+        <p>
+            <strong>Address:</strong>
+            @Model.Address
+        </p>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">
+                    @Model.PricePerNight.ToString("C",
+                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
+                    <span class="fs-6 fw-normal text-muted">/ night</span>
+                </h2>
+
+                <hr />
+
+                <p class="text-muted small">
+                    Cleaning fee:
+                    @Model.CleaningFee.ToString("C",
+                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
+                </p>
+
+                <p class="text-muted small">
+                    Service fee:
+                    @Model.ServiceFee.ToString("C",
+                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
+                </p>
+
+                <p class="small text-muted">
+                    Booking functionality will be available in a later stage.
+                </p>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Bookings"
+                       asp-action="Create"
+                       asp-route-propertyId="@Model.Id"
+                       class="btn btn-dark w-100">
+                        Book This Property
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="btn btn-dark w-100">
+                        Sign In to Book
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>

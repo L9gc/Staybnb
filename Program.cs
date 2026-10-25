@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Staybnb.Data;
 using Staybnb.Models;
+using Staybnb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,5 +56,10 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+using (var scope = app.Services.CreateScope())
+{
+    await RoleSeeder.SeedAsync(scope.ServiceProvider);
+}
 
 app.Run();

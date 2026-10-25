@@ -53,14 +53,13 @@
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         @if (User.IsInRole("Guest"))
-                        {
+                            {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Bookings" asp-action="Index">
+                                <a class="nav-link" asp-controller="Bookings" asp-action="MyBookings">
                                     My Bookings
                                 </a>
                             </li>
-                        }
-
+                            }
                         @if (User.IsInRole("Host"))
                         {
                             <li class="nav-item">

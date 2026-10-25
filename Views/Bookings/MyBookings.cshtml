@@ -1,0 +1,104 @@
+@model IEnumerable<Staybnb.Models.Booking>
+@using System.Globalization
+
+@{
+ViewData["Title"] = "My Bookings";
+var currency = CultureInfo.GetCultureInfo("en-ZA");
+}
+
+<div class="container py-5">
+    <div class="mb-5">
+        <p class="text-uppercase text-muted fw-semibold small mb-2">
+            Your reservations
+        </p>
+
+    <h1 class="display-5 fw-bold">My Bookings</h1>
+
+    <p class="text-muted">
+        View your reservation history and current booking statuses.
+    </p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center border rounded-4 py-5">
+        <h2 class="h4 fw-bold">No bookings yet</h2>
+
+        <p class="text-muted">
+            Your reservations will appear here when you make a booking.
+        </p>
+
+        <a asp-controller="Properties"
+           asp-action="Index"
+           class="btn btn-dark">
+            Explore Properties
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var booking in Model)
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row
+                                    justify-content-between gap-3">
+
+                            <div>
+                                <h2 class="h5 fw-bold">
+                                    @(booking.Property?.Title ?? "Property unavailable")
+                                </h2>
+
+                                <p class="text-muted mb-2">
+                                    @(booking.Property?.City ?? "Unknown location")
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Check-in:</strong>
+                                    @booking.CheckInDate.ToString("dd MMM yyyy")
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Check-out:</strong>
+                                    @booking.CheckOutDate.ToString("dd MMM yyyy")
+                                </p>
+
+                                <p class="mb-0">
+                                    <strong>Guests:</strong>
+                                    @booking.NumberOfGuests
+                                </p>
+                            </div>
+
+                            <div class="text-md-end">
+                                <span class="badge @(booking.Status == "Confirmed"
+                                    ? "bg-success"
+                                    : booking.Status == "Cancelled"
+                                        ? "bg-danger"
+                                        : "bg-warning text-dark")">
+                                    @booking.Status
+                                </span>
+
+                                <p class="text-muted small mt-3 mb-1">
+                                    BOOKING TOTAL
+                                </p>
+
+                                <p class="fs-4 fw-bold">
+                                    @booking.TotalPrice.ToString("C", currency)
+                                </p>
+
+                                <p class="text-muted small mb-0">
+                                    Booked on @booking.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+</div>

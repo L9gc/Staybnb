@@ -1,0 +1,98 @@
+@model Staybnb.Models.Booking
+@using System.Globalization
+
+@{
+ViewData["Title"] = "Booking Confirmation";
+var currency = CultureInfo.GetCultureInfo("en-ZA");
+var nights = (Model.CheckOutDate.Date - Model.CheckInDate.Date).Days;
+}
+
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 mx-auto"
+         style="max-width: 750px;">
+        <div class="card-body p-4 p-md-5">
+            <div class="mb-4">
+                <span class="badge bg-warning text-dark">Pending</span>
+            </div>
+
+        <h1 class="display-6 fw-bold">Booking Request Submitted</h1>
+
+        <p class="text-muted mt-3">
+            Your booking request has been recorded. Its current status is
+            pending.
+        </p>
+
+        <hr class="my-4" />
+
+        @if (Model.Property != null)
+        {
+            <h2 class="h4 fw-bold">@Model.Property.Title</h2>
+
+            <p class="text-muted">
+                @Model.Property.City, @Model.Property.Address
+            </p>
+        }
+
+        <div class="row g-3 mt-3">
+            <div class="col-sm-6">
+                <p class="text-muted small mb-1">CHECK-IN</p>
+                <p class="fw-semibold">@Model.CheckInDate.ToString("dd MMM yyyy")</p>
+            </div>
+
+            <div class="col-sm-6">
+                <p class="text-muted small mb-1">CHECK-OUT</p>
+                <p class="fw-semibold">@Model.CheckOutDate.ToString("dd MMM yyyy")</p>
+            </div>
+
+            <div class="col-sm-6">
+                <p class="text-muted small mb-1">NUMBER OF NIGHTS</p>
+                <p class="fw-semibold">@nights</p>
+            </div>
+
+            <div class="col-sm-6">
+                <p class="text-muted small mb-1">GUESTS</p>
+                <p class="fw-semibold">@Model.NumberOfGuests</p>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="d-flex justify-content-between mb-2">
+            <span>Accommodation</span>
+            <span>
+                @((Model.PricePerNight * nights).ToString("C", currency))
+            </span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+            <span>Cleaning fee</span>
+            <span>@Model.CleaningFee.ToString("C", currency)</span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3">
+            <span>Service fee</span>
+            <span>@Model.ServiceFee.ToString("C", currency)</span>
+        </div>
+
+        <hr />
+
+        <div class="d-flex justify-content-between mb-4">
+            <strong>Total</strong>
+            <strong class="fs-4">@Model.TotalPrice.ToString("C", currency)</strong>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <a asp-action="MyBookings" class="btn btn-dark">
+                View My Bookings
+            </a>
+
+            <a asp-controller="Properties"
+               asp-action="Index"
+               class="btn btn-outline-dark">
+                Explore More Properties
+            </a>
+        </div>
+    </div>
+</div>
+
+</div>

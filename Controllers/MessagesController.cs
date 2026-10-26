@@ -24,9 +24,11 @@ public MessagesController(
 
 // GET: /Messages
 // Displays messages received by the logged-in user.
+[HttpGet]
 public async Task<IActionResult> Index()
 {
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var userId = User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
 
     var messages = await _context.Messages
         .AsNoTracking()
@@ -41,9 +43,11 @@ public async Task<IActionResult> Index()
 
 // GET: /Messages/Sent
 // Displays messages sent by the logged-in user.
+[HttpGet]
 public async Task<IActionResult> Sent()
 {
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var userId = User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
 
     var messages = await _context.Messages
         .AsNoTracking()
@@ -57,17 +61,20 @@ public async Task<IActionResult> Sent()
 }
 
 // GET: /Messages/Details/5
-// Displays a message if the current user sent or received it.
+// Displays a message only to its sender or recipient.
+[HttpGet]
 public async Task<IActionResult> Details(int id)
 {
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var userId = User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
 
     var message = await _context.Messages
         .Include(m => m.Sender)
         .Include(m => m.Receiver)
         .FirstOrDefaultAsync(m =>
             m.Id == id &&
-            (m.SenderId == userId || m.ReceiverId == userId));
+            (m.SenderId == userId ||
+             m.ReceiverId == userId));
 
     if (message == null)
     {
@@ -75,7 +82,8 @@ public async Task<IActionResult> Details(int id)
     }
 
     // Mark received messages as read.
-    if (message.ReceiverId == userId && !message.IsRead)
+    if (message.ReceiverId == userId &&
+        !message.IsRead)
     {
         message.IsRead = true;
         await _context.SaveChangesAsync();
@@ -87,6 +95,7 @@ public async Task<IActionResult> Details(int id)
 // GET: /Messages/Create
 // Displays the compose form.
 // Supports preselecting a recipient and subject when replying.
+[HttpGet]
 public async Task<IActionResult> Create(
     string? receiverId,
     string? subject)
@@ -103,7 +112,7 @@ public async Task<IActionResult> Create(
 }
 
 // POST: /Messages/Create
-// Validates and sends a message.
+// Validates, sends the message and notifies the recipient.
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Create(
@@ -119,7 +128,7 @@ public async Task<IActionResult> Create(
         return Challenge();
     }
 
-    // Validate required fields.
+    // Validate the recipient.
     if (string.IsNullOrWhiteSpace(receiverId))
     {
         ModelState.AddModelError(
@@ -127,6 +136,7 @@ public async Task<IActionResult> Create(
             "Please select a recipient.");
     }
 
+    // Validate the subject.
     if (string.IsNullOrWhiteSpace(subject))
     {
         ModelState.AddModelError(
@@ -140,6 +150,7 @@ public async Task<IActionResult> Create(
             "The subject cannot exceed 150 characters.");
     }
 
+    // Validate the message content.
     if (string.IsNullOrWhiteSpace(content))
     {
         ModelState.AddModelError(
@@ -153,7 +164,7 @@ public async Task<IActionResult> Create(
             "The message cannot exceed 5000 characters.");
     }
 
-    // Verify that the recipient exists and isn't the sender.
+    // Confirm that the recipient exists and isn't the sender.
     var receiverExists =
         !string.IsNullOrWhiteSpace(receiverId) &&
         receiverId != senderId &&
@@ -167,19 +178,20 @@ public async Task<IActionResult> Create(
             "Please select a valid recipient.");
     }
 
+    // Redisplay the form if validation fails.
     if (!ModelState.IsValid)
     {
         await LoadRecipientsAsync(senderId);
 
         ViewBag.ReceiverId = receiverId;
         ViewBag.Subject = subject;
-
-        // Preserve the submitted values for the form.
         ViewBag.Content = content;
 
         return View();
     }
 
+
+    // Create the message.
     var message = new Message
     {
         SenderId = senderId,
@@ -192,15 +204,45 @@ public async Task<IActionResult> Create(
 
     _context.Messages.Add(message);
 
+    // Save first so the message has its database ID.
     await _context.SaveChangesAsync();
 
-    TempData["SuccessMessage"] = "Your message has been sent.";
+    // Get the sender's display name for the notification.
+    var sender = await _userManager.FindByIdAsync(senderId);
+
+    var senderName = sender?.FullName;
+
+    if (string.IsNullOrWhiteSpace(senderName))
+    {
+        senderName = sender?.Email ?? "Another user";
+    }
+
+    // Create a notification for the recipient.
+    var notification = new Notification
+    {
+        UserId = receiverId!,
+        Title = "New Message",
+        MessageText =
+            $"{senderName} sent you a message: {message.Subject}",
+        LinkUrl = $"/Messages/Details/{message.Id}",
+        IsRead = false,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    _context.Notifications.Add(notification);
+
+    await _context.SaveChangesAsync();
+    
+
+    TempData["SuccessMessage"] =
+        "Your message has been sent successfully.";
 
     return RedirectToAction(nameof(Index));
 }
 
 // GET: /Messages/Reply/5
 // Opens the compose form addressed to the other participant.
+[HttpGet]
 public async Task<IActionResult> Reply(int id)
 {
     var userId = User.FindFirstValue(
@@ -218,11 +260,12 @@ public async Task<IActionResult> Reply(int id)
         return NotFound();
     }
 
-    // Reply to the other participant.
+    // Determine the other participant.
     var receiverId = originalMessage.SenderId == userId
         ? originalMessage.ReceiverId
         : originalMessage.SenderId;
 
+    // Avoid repeatedly adding "Re:" to the subject.
     var subject = originalMessage.Subject.StartsWith(
         "Re: ",
         StringComparison.OrdinalIgnoreCase)
@@ -239,7 +282,8 @@ public async Task<IActionResult> Reply(int id)
 }
 
 // Loads available recipients for the compose form.
-private async Task LoadRecipientsAsync(string? currentUserId)
+private async Task LoadRecipientsAsync(
+    string? currentUserId)
 {
     ViewBag.Users = await _userManager.Users
         .Where(u => u.Id != currentUserId)

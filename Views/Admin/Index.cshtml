@@ -1,89 +1,98 @@
 @model List<Staybnb.Models.HostApplication>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+ViewData["Title"] = "Admin Dashboard";
 }
 
 <div class="container mt-4">
-    <h1>Admin Dashboard</h1>
 
-    <p class="text-muted">
-        Review and manage applications from users who want to become hosts.
-    </p>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p class="text-muted mb-0">
+            Review and manage applications from users who want to become hosts.
+        </p>
+    </div>
 
-    <hr />
+    <a asp-controller="Admin"
+       asp-action="ActivityLogs"
+       class="btn btn-outline-primary">
+        <i class="bi bi-clock-history"></i> View Activity Logs
+    </a>
+</div>
 
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-info">
-            @TempData["Message"]
-        </div>
-    }
+<hr />
 
-    <h3>Pending Host Applications</h3>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["Message"]
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-secondary mt-3">
-            There are currently no pending host applications.
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive mt-3">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-dark">
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+<h3 class="mt-4">Pending Host Applications</h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary mt-3">
+        There are currently no pending host applications.
+    </div>
+}
+else
+{
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Property</th>
+                    <th>Applicant</th>
+                    <th>Location</th>
+                    <th>Price Per Night</th>
+                    <th>Date Submitted</th>
+                    <th>Images</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var application in Model)
+                {
                     <tr>
-                        <th>Property</th>
-                        <th>Applicant</th>
-                        <th>Location</th>
-                        <th>Price Per Night</th>
-                        <th>Date Submitted</th>
-                        <th>Images</th>
-                        <th>Action</th>
+                        <td>@application.Title</td>
+
+                        <td>
+                            @(application.Applicant?.FullName ?? "Unknown applicant")
+                        </td>
+
+                        <td>@application.City</td>
+
+                        <td>R @application.PricePerNight.ToString("N2")</td>
+
+                        <td>
+                            @(application.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy"))
+                        </td>
+
+                        <td>@application.Images.Count</td>
+
+                        <td>
+                            <a asp-controller="Admin"
+                               asp-action="ReviewApplication"
+                               asp-route-id="@application.Id"
+                               class="btn btn-primary btn-sm">
+                                Review
+                            </a>
+                        </td>
                     </tr>
-                </thead>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
-                <tbody>
-                    @foreach (var application in Model)
-                    {
-                        <tr>
-                            <td>@application.Title</td>
-
-                            <td>
-                                @(application.Applicant?.FullName
-                                    ?? "Unknown applicant")
-                            </td>
-
-                            <td>
-                                @application.City
-                            </td>
-
-                            <td>
-                                R @application.PricePerNight.ToString("N2")
-                            </td>
-
-                            <td>
-                                @application.SubmittedAt.ToLocalTime()
-                                    .ToString("dd MMM yyyy")
-                            </td>
-
-                            <td>
-                                @application.Images.Count
-                            </td>
-
-                            <td>
-                                <a asp-controller="Admin"
-                                   asp-action="ReviewApplication"
-                                   asp-route-id="@application.Id"
-                                   class="btn btn-primary btn-sm">
-                                    Review
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 </div>

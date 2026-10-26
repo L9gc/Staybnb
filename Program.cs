@@ -14,16 +14,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(
 builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register Activity Logging.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ActivityLogger>();
+
 // Configure ASP.NET Core Identity.
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
 options.User.RequireUniqueEmail = true;
+
 options.Password.RequiredLength = 8;
 options.Password.RequireDigit = true;
 options.Password.RequireUppercase = true;
 options.Password.RequireLowercase = true;
 options.Password.RequireNonAlphanumeric = false;
-
 
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -63,12 +67,10 @@ using (var scope = app.Services.CreateScope())
 {
 await RoleSeeder.SeedAsync(scope.ServiceProvider);
 
-
 var dbContext = scope.ServiceProvider
     .GetRequiredService<ApplicationDbContext>();
 
 await PropertySeeder.SeedAsync(dbContext);
-
 
 }
 

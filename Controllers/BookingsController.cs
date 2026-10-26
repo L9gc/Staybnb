@@ -175,6 +175,39 @@ public async Task<IActionResult> MyBookings()
     return View(bookings);
 }
 
+// GET: /Bookings/CheckInInstructions/1
+// Display check-in instructions for the guest's approved booking.
+[HttpGet]
+public async Task<IActionResult> CheckInInstructions(int id)
+{
+    var guestId = _userManager.GetUserId(User);
+
+    var booking = await _context.Bookings
+        .AsNoTracking()
+        .Include(b => b.Property)
+        .FirstOrDefaultAsync(b =>
+            b.Id == id &&
+            b.GuestId == guestId &&
+            b.Status == "Approved");
+
+    if (booking == null)
+    {
+        return NotFound();
+    }
+
+    var checkInProcess = await _context.CheckInProcesses
+        .AsNoTracking()
+        .FirstOrDefaultAsync(c =>
+            c.PropertyId == booking.PropertyId);
+
+    ViewBag.BookingId = booking.Id;
+    ViewBag.PropertyTitle = booking.Property.Title;
+    ViewBag.CheckInDate = booking.CheckInDate;
+    ViewBag.CheckOutDate = booking.CheckOutDate;
+
+    return View(checkInProcess);
+}
+
 // GET: /Bookings/UploadDocument/1
 // Display the document upload form for an approved booking.
 [HttpGet]
@@ -272,7 +305,7 @@ public async Task<IActionResult> UploadDocument(
         .GetExtension(model.File!.FileName)
         .ToLowerInvariant();
 
-    // Store documents outside wwwroot so they aren't publicly accessible.
+    // Store documents outside wwwroot.
     var uploadDirectory = Path.Combine(
         _environment.ContentRootPath,
         "App_Data",
@@ -281,8 +314,7 @@ public async Task<IActionResult> UploadDocument(
     Directory.CreateDirectory(uploadDirectory);
 
     // Use a generated filename rather than the original filename.
-    var storedFileName =
-        $"{Guid.NewGuid()}{fileExtension}";
+    var storedFileName = $"{Guid.NewGuid()}{fileExtension}";
 
     var fullPath = Path.Combine(
         uploadDirectory,

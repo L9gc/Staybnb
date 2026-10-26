@@ -1,0 +1,154 @@
+@model Staybnb.Models.CheckInProcess?
+
+@{
+    ViewData["Title"] = "Check-in Instructions";
+
+    var propertyTitle = ViewBag.PropertyTitle as string
+        ?? "Your Property";
+
+    var bookingId = (int)ViewBag.BookingId;
+
+    var checkInDate = (DateTime)ViewBag.CheckInDate;
+    var checkOutDate = (DateTime)ViewBag.CheckOutDate;
+}
+
+<div class="container py-5">
+
+    <div class="mb-4">
+        <a asp-controller="Bookings"
+           asp-action="MyBookings"
+           class="text-decoration-none text-muted">
+
+            &larr; Back to My Bookings
+        </a>
+    </div>
+
+    <div class="mb-5">
+        <p class="text-uppercase text-muted fw-semibold small mb-2">
+            Your upcoming stay
+        </p>
+
+        <h1 class="display-5 fw-bold">
+            Check-in Instructions
+        </h1>
+
+        <p class="text-muted">
+            Everything you need to know before arriving at
+            @propertyTitle.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+
+            <h2 class="h4 fw-bold mb-3">
+                @propertyTitle
+            </h2>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <p class="text-muted small mb-1">
+                        CHECK-IN DATE
+                    </p>
+
+                    <p class="fw-semibold mb-0">
+                        @checkInDate.ToString("dd MMMM yyyy")
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <p class="text-muted small mb-1">
+                        CHECK-OUT DATE
+                    </p>
+
+                    <p class="fw-semibold mb-0">
+                        @checkOutDate.ToString("dd MMMM yyyy")
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    @if (Model == null)
+    {
+        <div class="alert alert-info rounded-4">
+            <h2 class="h5 fw-bold">
+                Instructions not available yet
+            </h2>
+
+            <p class="mb-0">
+                The host has not added check-in instructions
+                for this property yet. Please check again later.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h4 fw-bold mb-3">
+                    Check-in Rules
+                </h2>
+
+                @if (string.IsNullOrWhiteSpace(Model.Rules))
+                {
+                    <p class="text-muted mb-0">
+                        No check-in rules have been provided.
+                    </p>
+                }
+                else
+                {
+                    <div class="text-break"
+                         style="white-space: pre-line">@Model.Rules</div>
+                }
+
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h4 fw-bold mb-3">
+                    Required Documents
+                </h2>
+
+                @if (string.IsNullOrWhiteSpace(Model.RequiredDocuments))
+                {
+                    <p class="text-muted mb-0">
+                        No specific documents have been listed by the host.
+                    </p>
+                }
+                else
+                {
+                    <div class="text-break"
+                         style="white-space: pre-line">@Model.RequiredDocuments</div>
+                }
+
+            </div>
+        </div>
+    }
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+
+        <a asp-controller="Bookings"
+           asp-action="UploadDocument"
+           asp-route-id="@bookingId"
+           class="btn btn-primary">
+
+            Upload Documents
+        </a>
+
+        <a asp-controller="Bookings"
+           asp-action="MyBookings"
+           class="btn btn-outline-secondary">
+
+            Back to My Bookings
+        </a>
+
+    </div>
+
+</div>

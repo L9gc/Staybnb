@@ -1,98 +1,223 @@
 @model IEnumerable<Staybnb.Models.ActivityLog>
+@using System.Globalization
 
 @{
 ViewData["Title"] = "Activity Logs";
+
+var activities = Model?.ToList() ?? new List<Staybnb.Models.ActivityLog>();
+var today = DateTime.Today;
+
+var todayCount = activities.Count(a => a.Timestamp.ToLocalTime().Date == today);
+var uniqueUsers = activities
+    .Where(a => !string.IsNullOrWhiteSpace(a.UserId))
+    .Select(a => a.UserId)
+    .Distinct()
+    .Count();
+
+var uniqueActions = activities
+    .Where(a => !string.IsNullOrWhiteSpace(a.Action))
+    .Select(a => a.Action)
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .Count();
+
+
 }
 
-<div class="container py-4">
+<div class="admin-logs-page">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2>Activity Logs</h2>
-        <p class="text-muted mb-0">
-            Monitor important actions performed throughout Staybnb.
-        </p>
+
+<section class="admin-logs-hero">
+    <div class="admin-logs-hero-content">
+        <span class="admin-dashboard-eyebrow">STAYBNB ADMINISTRATION</span>
+        <h1>Activity Logs</h1>
+        <p>Monitor recorded actions across Staybnb and review important events associated with user accounts and system activity.</p>
+
+        <div class="admin-logs-hero-meta">
+            <span class="admin-logs-live-dot"></span>
+            Displaying the activity records provided by the system
+        </div>
     </div>
 
     <a asp-controller="Admin"
        asp-action="Index"
-       class="btn btn-outline-secondary">
+       class="admin-logs-back-btn">
+        <span aria-hidden="true">←</span>
         Back to Dashboard
     </a>
-</div>
+</section>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
+<section class="admin-logs-stats">
 
-        @if (Model.Any())
+    <article class="admin-logs-stat-card">
+        <div class="admin-logs-stat-top">
+            <span>Recorded Activities</span>
+            <span class="admin-logs-stat-icon logs-icon-total">▤</span>
+        </div>
+        <strong>@activities.Count</strong>
+        <p>Activities in this result set</p>
+    </article>
+
+    <article class="admin-logs-stat-card">
+        <div class="admin-logs-stat-top">
+            <span>Today's Activities</span>
+            <span class="admin-logs-stat-icon logs-icon-today">◷</span>
+        </div>
+        <strong>@todayCount</strong>
+        <p>Records dated today</p>
+    </article>
+
+    <article class="admin-logs-stat-card">
+        <div class="admin-logs-stat-top">
+            <span>Users Involved</span>
+            <span class="admin-logs-stat-icon logs-icon-users">♙</span>
+        </div>
+        <strong>@uniqueUsers</strong>
+        <p>Distinct user IDs represented</p>
+    </article>
+
+    <article class="admin-logs-stat-card">
+        <div class="admin-logs-stat-top">
+            <span>Action Types</span>
+            <span class="admin-logs-stat-icon logs-icon-actions">⌘</span>
+        </div>
+        <strong>@uniqueActions</strong>
+        <p>Distinct recorded action names</p>
+    </article>
+
+</section>
+
+<section class="admin-logs-table-section">
+
+    <div class="admin-logs-section-heading">
+        <div>
+            <span class="admin-dashboard-eyebrow">SYSTEM MONITORING</span>
+            <h2>Recorded Activity</h2>
+            <p>Review timestamps, action descriptions, associated users, and available IP addresses.</p>
+        </div>
+
+        <span class="admin-logs-record-count">
+            @activities.Count records
+        </span>
+    </div>
+
+    <div class="admin-logs-table-card">
+
+        @if (activities.Any())
         {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-light">
+            <div class="admin-logs-table-scroll">
+                <table class="admin-logs-table">
+                    <thead>
                         <tr>
                             <th>Date and Time</th>
                             <th>Action</th>
                             <th>Details</th>
-                            <th>User ID</th>
+                            <th>User</th>
                             <th>IP Address</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @foreach (var activity in Model)
+                        @foreach (var activity in activities)
                         {
+                            var action = activity.Action ?? "Unspecified";
+                            var actionLower = action.ToLowerInvariant();
+
+                            var badgeClass =
+                                actionLower.Contains("reject") ? "logs-badge-danger" :
+                                actionLower.Contains("delete") ? "logs-badge-danger" :
+                                actionLower.Contains("fail") ? "logs-badge-danger" :
+                                actionLower.Contains("approve") ? "logs-badge-success" :
+                                actionLower.Contains("create") ? "logs-badge-success" :
+                                actionLower.Contains("register") ? "logs-badge-success" :
+                                actionLower.Contains("login") ? "logs-badge-info" :
+                                actionLower.Contains("logout") ? "logs-badge-neutral" :
+                                actionLower.Contains("update") ? "logs-badge-warning" :
+                                actionLower.Contains("edit") ? "logs-badge-warning" :
+                                "logs-badge-default";
+
                             <tr>
-                                <td class="text-nowrap">
-                                    @activity.Timestamp.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                                <td>
+                                    <div class="admin-logs-date">
+                                        <strong>
+                                            @activity.Timestamp.ToLocalTime().ToString("dd MMM yyyy")
+                                        </strong>
+                                        <span>
+                                            @activity.Timestamp.ToLocalTime().ToString("HH:mm:ss")
+                                        </span>
+                                    </div>
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-primary">
-                                        @activity.Action
+                                    <span class="admin-logs-action-badge @badgeClass">
+                                        @action
                                     </span>
                                 </td>
 
                                 <td>
-                                    @activity.Details
+                                    <div class="admin-logs-details">
+                                        @(string.IsNullOrWhiteSpace(activity.Details)
+                                            ? "No additional details"
+                                            : activity.Details)
+                                    </div>
                                 </td>
 
                                 <td>
-                                    <small>
-                                        @(string.IsNullOrWhiteSpace(activity.UserId)
-                                            ? "System / Unknown"
-                                            : activity.UserId)
-                                    </small>
+                                    @if (string.IsNullOrWhiteSpace(activity.UserId))
+                                    {
+                                        <span class="admin-logs-system-user">
+                                            System / Unknown
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-logs-user-id" title="@activity.UserId">
+                                            @activity.UserId
+                                        </span>
+                                    }
                                 </td>
 
                                 <td>
-                                    <small>
-                                        @(activity.IPAddress ?? "Unavailable")
-                                    </small>
+                                    <span class="admin-logs-ip">
+                                        @(string.IsNullOrWhiteSpace(activity.IPAddress)
+                                            ? "Unavailable"
+                                            : activity.IPAddress)
+                                    </span>
                                 </td>
                             </tr>
                         }
                     </tbody>
-
                 </table>
+            </div>
+
+            <div class="admin-logs-table-footer">
+                <span>Showing @activities.Count recorded activities</span>
+                <span>Activity history is displayed according to the controller's query.</span>
             </div>
         }
         else
         {
-            <div class="text-center py-5">
-                <h5>No activity recorded yet</h5>
-                <p class="text-muted">
-                    Activity records will appear here when users
-                    perform tracked actions.
-                </p>
+            <div class="admin-logs-empty">
+                <div class="admin-logs-empty-icon">▤</div>
+                <h3>No activity recorded yet</h3>
+                <p>Activity records will appear here when tracked actions occur throughout Staybnb.</p>
+
+                <a asp-controller="Admin"
+                   asp-action="Index"
+                   class="admin-logs-empty-btn">
+                    Return to Dashboard
+                </a>
             </div>
         }
 
     </div>
-</div>
+</section>
 
-<p class="text-muted small mt-3">
-    Showing up to the latest 200 recorded activities.
-</p>
+<section class="admin-logs-notice">
+    <div class="admin-logs-notice-icon">i</div>
+    <div>
+        <strong>About activity records</strong>
+        <p>These records reflect the data supplied by the activity log query. User IDs and IP addresses are displayed as recorded, and missing information is identified accordingly.</p>
+    </div>
+</section>
 
 </div>

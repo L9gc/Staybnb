@@ -1,98 +1,216 @@
 @model List<Staybnb.Models.HostApplication>
+@using System.Globalization
 
 @{
 ViewData["Title"] = "Admin Dashboard";
+
+var applications = Model ?? new List<Staybnb.Models.HostApplication>();
+var zar = new CultureInfo("en-ZA");
+var pendingCount = applications.Count;
+var totalImages = applications.Sum(a => a.Images?.Count ?? 0);
+
+
 }
 
-<div class="container mt-4">
+<div class="admin-dashboard">
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-    <div>
+<section class="admin-dashboard-hero">
+    <div class="admin-dashboard-hero-content">
+        <span class="admin-dashboard-eyebrow">STAYBNB ADMINISTRATION</span>
         <h1>Admin Dashboard</h1>
-        <p class="text-muted mb-0">
-            Review and manage applications from users who want to become hosts.
-        </p>
+        <p>Review host applications, evaluate property submissions, and help maintain the quality of Staybnb listings.</p>
+
+        <div class="admin-dashboard-hero-meta">
+            <span class="admin-hero-indicator"></span>
+            @pendingCount pending @(pendingCount == 1 ? "application" : "applications") awaiting review
+        </div>
     </div>
 
-    <a asp-controller="Admin"
-       asp-action="ActivityLogs"
-       class="btn btn-outline-primary">
-        <i class="bi bi-clock-history"></i> View Activity Logs
-    </a>
-</div>
-
-<hr />
+    <div class="admin-dashboard-hero-actions">
+        <a asp-controller="Admin"
+           asp-action="ActivityLogs"
+           class="admin-activity-btn">
+            <span class="admin-activity-icon">◷</span>
+            <span>
+                <strong>Activity Logs</strong>
+                <small>Review system activity</small>
+            </span>
+            <span class="admin-activity-arrow">→</span>
+        </a>
+    </div>
+</section>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show admin-dashboard-alert" role="alert">
         @TempData["Message"]
-
         <button type="button"
                 class="btn-close"
                 data-bs-dismiss="alert"
-                aria-label="Close">
-        </button>
+                aria-label="Close"></button>
     </div>
 }
 
-<h3 class="mt-4">Pending Host Applications</h3>
+<section class="admin-dashboard-stats">
 
-@if (!Model.Any())
-{
-    <div class="alert alert-secondary mt-3">
-        There are currently no pending host applications.
+    <article class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Pending Applications</span>
+            <span class="admin-stat-icon admin-stat-pending">◷</span>
+        </div>
+        <strong>@pendingCount</strong>
+        <p>Awaiting administrative review</p>
+    </article>
+
+    <article class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Properties Submitted</span>
+            <span class="admin-stat-icon admin-stat-properties">⌂</span>
+        </div>
+        <strong>@pendingCount</strong>
+        <p>Properties awaiting a decision</p>
+    </article>
+
+    <article class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Submitted Images</span>
+            <span class="admin-stat-icon admin-stat-images">▧</span>
+        </div>
+        <strong>@totalImages</strong>
+        <p>Images attached to pending applications</p>
+    </article>
+
+</section>
+
+<section class="admin-applications-section">
+
+    <div class="admin-section-heading">
+        <div>
+            <span class="admin-dashboard-eyebrow">APPLICATION MANAGEMENT</span>
+            <h2>Pending Host Applications</h2>
+            <p>Review the property details and submitted images before making a decision.</p>
+        </div>
+
+        <span class="admin-application-count">
+            @pendingCount @(pendingCount == 1 ? "application" : "applications")
+        </span>
     </div>
-}
-else
-{
-    <div class="table-responsive mt-3">
-        <table class="table table-bordered table-striped table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Property</th>
-                    <th>Applicant</th>
-                    <th>Location</th>
-                    <th>Price Per Night</th>
-                    <th>Date Submitted</th>
-                    <th>Images</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
 
-            <tbody>
-                @foreach (var application in Model)
-                {
-                    <tr>
-                        <td>@application.Title</td>
+    @if (!applications.Any())
+    {
+        <div class="admin-empty-state">
+            <div class="admin-empty-icon">✓</div>
+            <h3>You're all caught up</h3>
+            <p>There are currently no pending host applications.</p>
+            <span>New submissions will appear here when users apply to become hosts.</span>
+        </div>
+    }
+    else
+    {
+        <div class="admin-applications-table-card">
+            <div class="admin-applications-table-scroll">
+                <table class="admin-applications-table">
+                    <thead>
+                        <tr>
+                            <th>Property Details</th>
+                            <th>Applicant</th>
+                            <th>Location</th>
+                            <th>Price Per Night</th>
+                            <th>Date Submitted</th>
+                            <th>Images</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
 
-                        <td>
-                            @(application.Applicant?.FullName ?? "Unknown applicant")
-                        </td>
+                    <tbody>
+                        @foreach (var application in applications)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="admin-property-info">
+                                        <div class="admin-property-icon">⌂</div>
+                                        <div>
+                                            <strong>@application.Title</strong>
+                                            <span>@application.PropertyType</span>
+                                        </div>
+                                    </div>
+                                </td>
 
-                        <td>@application.City</td>
+                                <td>
+                                    <div class="admin-applicant-info">
+                                        <div class="admin-applicant-avatar">
+                                            @{
+                                                var applicantName = application.Applicant?.FullName;
+                                                var initials = string.IsNullOrWhiteSpace(applicantName)
+                                                    ? "?"
+                                                    : string.Join("", applicantName
+                                                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                                        .Take(2)
+                                                        .Select(part => part[0]))
+                                                        .ToUpperInvariant();
+                                            }
+                                            @initials
+                                        </div>
+                                        <span>@(application.Applicant?.FullName ?? "Unknown applicant")</span>
+                                    </div>
+                                </td>
 
-                        <td>R @application.PricePerNight.ToString("N2")</td>
+                                <td>
+                                    <span class="admin-location">
+                                        <span aria-hidden="true">⌖</span>
+                                        @application.City
+                                    </span>
+                                </td>
 
-                        <td>
-                            @(application.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy"))
-                        </td>
+                                <td>
+                                    <strong class="admin-application-price">
+                                        @application.PricePerNight.ToString("C", zar)
+                                    </strong>
+                                    <span class="admin-price-period">per night</span>
+                                </td>
 
-                        <td>@application.Images.Count</td>
+                                <td>
+                                    <span class="admin-submitted-date">
+                                        @application.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                    </span>
+                                </td>
 
-                        <td>
-                            <a asp-controller="Admin"
-                               asp-action="ReviewApplication"
-                               asp-route-id="@application.Id"
-                               class="btn btn-primary btn-sm">
-                                Review
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                                <td>
+                                    <span class="admin-image-count">
+                                        ▧ @(application.Images?.Count ?? 0)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a asp-controller="Admin"
+                                       asp-action="ReviewApplication"
+                                       asp-route-id="@application.Id"
+                                       class="admin-review-btn">
+                                        Review Application
+                                        <span aria-hidden="true">→</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-table-footer">
+                <span>Showing @pendingCount pending @(pendingCount == 1 ? "application" : "applications")</span>
+                <span>Staybnb Administration</span>
+            </div>
+        </div>
+    }
+
+</section>
+
+<section class="admin-dashboard-footer">
+    <div class="admin-footer-icon">i</div>
+    <div>
+        <strong>Review applications carefully</strong>
+        <p>Check the submitted property information and images before approving or rejecting an application.</p>
     </div>
-}
+</section>
 
 </div>

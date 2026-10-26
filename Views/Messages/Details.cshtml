@@ -1,71 +1,126 @@
 @model Staybnb.Models.Message
 
 @{
-    ViewData["Title"] = "Message Details";
+ViewData["Title"] = "Message Details";
+
+var senderName = Model.Sender?.FullName
+    ?? Model.Sender?.Email
+    ?? "Unknown user";
+
+var receiverName = Model.Receiver?.FullName
+    ?? Model.Receiver?.Email
+    ?? "Unknown user";
+
+var senderInitials = string.Join(
+    "",
+    senderName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part => char.ToUpperInvariant(part[0])));
+
+var receiverInitials = string.Join(
+    "",
+    receiverName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part => char.ToUpperInvariant(part[0])));
+
+
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+<div class="messages-page message-details-page">
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Message Details</h1>
+<div class="messages-header">
+    <div>
+        <span class="messages-eyebrow">STAYBNB MESSAGES</span>
+        <h1>Message Details</h1>
+        <p>Read your message and continue the conversation.</p>
+    </div>
 
-                <a asp-action="Index" class="btn btn-outline-secondary">
-                    Back to Inbox
-                </a>
-            </div>
+    <a asp-action="Index" class="compose-back-btn">
+        <span aria-hidden="true">&larr;</span>
+        Back to Inbox
+    </a>
+</div>
 
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h4 class="mb-0">@Model.Subject</h4>
-                </div>
+<div class="message-details-card">
 
-                <div class="card-body">
+    <div class="message-details-heading">
+        <div class="message-details-subject-icon">
+            <span aria-hidden="true">&#9993;</span>
+        </div>
 
-                    <div class="mb-3">
-                        <strong>From:</strong>
-                        @(Model.Sender?.FullName
-                            ?? Model.Sender?.Email
-                            ?? "Unknown user")
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>To:</strong>
-                        @(Model.Receiver?.FullName
-                            ?? Model.Receiver?.Email
-                            ?? "Unknown user")
-                    </div>
-
-                    <div class="mb-4">
-                        <strong>Date:</strong>
-                        @Model.SentAt.ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
-                    </div>
-
-                    <hr />
-
-                    <div class="message-content">
-                        <p style="white-space: pre-wrap;">@Model.Content</p>
-                    </div>
-
-                </div>
-
-                <div class="card-footer d-flex justify-content-between">
-
-                    <a asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        Inbox
-                    </a>
-
-                    <a asp-action="Reply"
-                       asp-route-id="@Model.Id"
-                       class="btn btn-primary">
-                        Reply
-                    </a>
-
-                </div>
-            </div>
-
+        <div class="message-details-subject">
+            <span class="messages-eyebrow">MESSAGE SUBJECT</span>
+            <h2>@Model.Subject</h2>
+            <p>
+                Sent @Model.SentAt.ToLocalTime().ToString("dd MMMM yyyy 'at' HH:mm")
+            </p>
         </div>
     </div>
+
+    <div class="message-details-people">
+
+        <div class="message-person">
+            <div class="message-avatar">
+                @senderInitials
+            </div>
+
+            <div class="message-person-info">
+                <span class="message-person-label">FROM</span>
+                <strong>@senderName</strong>
+                @if (!string.IsNullOrWhiteSpace(Model.Sender?.Email))
+                {
+                    <span class="message-person-email">
+                        @Model.Sender.Email
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="message-person">
+            <div class="message-avatar message-recipient-avatar">
+                @receiverInitials
+            </div>
+
+            <div class="message-person-info">
+                <span class="message-person-label">TO</span>
+                <strong>@receiverName</strong>
+                @if (!string.IsNullOrWhiteSpace(Model.Receiver?.Email))
+                {
+                    <span class="message-person-email">
+                        @Model.Receiver.Email
+                    </span>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <div class="message-details-body">
+        <div class="message-body-label">MESSAGE</div>
+
+        <div class="message-content">
+            <p>@Model.Content</p>
+        </div>
+    </div>
+
+    <div class="message-details-footer">
+        <a asp-action="Index" class="compose-cancel-btn">
+            Back to Inbox
+        </a>
+
+        <a asp-action="Reply"
+           asp-route-id="@Model.Id"
+           class="compose-send-btn">
+            <span aria-hidden="true">&#8617;</span>
+            Reply to Message
+        </a>
+    </div>
+
+</div>
+
+<div class="messages-footer-note">
+    <span>Staybnb</span>
+    <span>Your conversations, all in one place.</span>
+</div>
+
 </div>

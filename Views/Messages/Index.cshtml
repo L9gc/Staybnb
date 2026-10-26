@@ -1,85 +1,140 @@
 @model List<Staybnb.Models.Message>
 
 @{
-    ViewData["Title"] = "Inbox";
+ViewData["Title"] = "Inbox";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="messages-page">
+    <div class="messages-header">
         <div>
-            <h1>Inbox</h1>
-            <p class="text-muted">Messages you've received on Staybnb.</p>
+            <span class="messages-eyebrow">STAYBNB MESSAGES</span>
+            <h1>Your Inbox</h1>
+            <p>Stay connected with guests, hosts, and the Staybnb community.</p>
         </div>
 
-        <a asp-action="Create" class="btn btn-primary">
-            Compose Message
-        </a>
+    <a asp-action="Create" class="messages-compose-btn">
+        <span class="messages-compose-icon">+</span>
+        Compose Message
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="messages-alert">
+        <span>@TempData["SuccessMessage"]</span>
     </div>
+}
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
-        </div>
-    }
+@{
+    var unreadCount = Model.Count(m => !m.IsRead);
+}
 
-    <div class="mb-3">
-        <a asp-action="Index" class="btn btn-outline-primary active">
+<div class="messages-toolbar">
+    <div class="messages-tabs">
+        <a asp-action="Index" class="messages-tab active">
             Inbox
+            @if (unreadCount > 0)
+            {
+                <span class="messages-count">@unreadCount</span>
+            }
         </a>
 
-        <a asp-action="Sent" class="btn btn-outline-secondary">
+        <a asp-action="Sent" class="messages-tab">
             Sent Messages
         </a>
     </div>
 
-    @if (Model.Count == 0)
-    {
-        <div class="card shadow-sm">
-            <div class="card-body text-center py-5">
-                <h4>Your inbox is empty</h4>
-                <p class="text-muted">
-                    Messages from other Staybnb users will appear here.
-                </p>
-            </div>
+    <div class="messages-summary">
+        <span class="messages-summary-dot"></span>
+        @Model.Count message@(Model.Count == 1 ? "" : "s")
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="messages-empty">
+        <div class="messages-empty-icon">
+            <span>✉</span>
         </div>
-    }
-    else
-    {
-        <div class="list-group shadow-sm">
-            @foreach (var message in Model)
-            {
-                <a asp-action="Details"
-                   asp-route-id="@message.Id"
-                   class="list-group-item list-group-item-action
-                          @(message.IsRead ? "" : "fw-bold")">
 
-                    <div class="d-flex justify-content-between">
-                        <h5 class="mb-1">
-                            @message.Subject
-                        </h5>
+        <h3>Your inbox is waiting</h3>
 
-                        <small class="text-muted">
-                            @message.SentAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
-                        </small>
+        <p>
+            You haven't received any messages yet.
+            When someone contacts you through Staybnb,
+            their messages will appear here.
+        </p>
+
+        <a asp-action="Create" class="messages-empty-btn">
+            Compose a Message
+        </a>
+    </div>
+}
+else
+{
+    <div class="messages-list">
+        @foreach (var message in Model)
+        {
+            <a asp-action="Details"
+               asp-route-id="@message.Id"
+               class="message-item @(message.IsRead ? "" : "message-unread")">
+
+                <div class="message-avatar">
+                    @{
+                        var senderName = message.Sender?.FullName
+                            ?? message.Sender?.Email
+                            ?? "Unknown user";
+
+                        var initials = string.Join(
+                            "",
+                            senderName.Split(
+                                ' ',
+                                StringSplitOptions.RemoveEmptyEntries)
+                            .Take(2)
+                            .Select(part => char.ToUpperInvariant(part[0])));
+                    }
+
+                    @initials
+                </div>
+
+                <div class="message-main">
+                    <div class="message-topline">
+                        <span class="message-sender">
+                            @senderName
+                        </span>
+
+                        <span class="message-date">
+                            @message.SentAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                        </span>
                     </div>
 
-                    <p class="mb-1">
-                        From: @(message.Sender?.FullName ?? message.Sender?.Email ?? "Unknown user")
-                    </p>
+                    <div class="message-subject-row">
+                        <h3>@message.Subject</h3>
 
-                    <small class="text-muted">
-                        @(message.Content.Length > 100
-                            ? message.Content[..100] + "..."
+                        @if (!message.IsRead)
+                        {
+                            <span class="message-new-badge">NEW</span>
+                        }
+                    </div>
+
+                    <p class="message-preview">
+                        @(message.Content.Length > 120
+                            ? message.Content[..120] + "..."
                             : message.Content)
-                    </small>
+                    </p>
+                </div>
 
-                    @if (!message.IsRead)
-                    {
-                        <span class="badge bg-primary ms-2">New</span>
-                    }
-                </a>
-            }
-        </div>
-    }
+                <div class="message-arrow" aria-hidden="true">
+                    &#8250;
+                </div>
+            </a>
+        }
+    </div>
+}
+
+<div class="messages-footer-note">
+    <span>Staybnb</span>
+    <span>Keep your conversations in one place.</span>
+</div>
+
 </div>

@@ -1,91 +1,143 @@
 @model Staybnb.ViewModels.LoginViewModel
 
 @{
-    ViewData["Title"] = "Sign In";
+ViewData["Title"] = "Sign In";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
+<div class="auth-page">
+    <div class="auth-container">
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
+    <!-- Left: Welcome panel -->
+    <div class="auth-welcome">
+        <div class="auth-brand">
+            <span class="auth-brand-icon">S</span>
+            <span>Staybnb</span>
+        </div>
 
-                    <div class="text-center mb-4">
-                        <h1 class="h3 fw-bold">Welcome Back</h1>
-                        <p class="text-muted">
-                            Sign in to your Staybnb account.
-                        </p>
-                    </div>
+        <div class="auth-welcome-content">
+            <span class="auth-eyebrow">YOUR NEXT STAY STARTS HERE</span>
 
-                    <form asp-controller="Account"
-                          asp-action="Login"
-                          asp-route-returnUrl="@ViewData["ReturnUrl"]"
-                          method="post">
+            <h1>Welcome back.</h1>
 
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3">
-                        </div>
+            <p>
+                Find your next getaway, manage your bookings,
+                and pick up right where you left off.
+            </p>
 
-                        <div class="mb-3">
-                            <label asp-for="Email"
-                                   class="form-label"></label>
-
-                            <input asp-for="Email"
-                                   class="form-control"
-                                   placeholder="name@example.com"
-                                   autocomplete="username" />
-
-                            <span asp-validation-for="Email"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password"
-                                   class="form-label"></label>
-
-                            <input asp-for="Password"
-                                   class="form-control"
-                                   placeholder="Enter your password"
-                                   autocomplete="current-password" />
-
-                            <span asp-validation-for="Password"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="form-check mb-4">
-                            <input asp-for="RememberMe"
-                                   class="form-check-input" />
-
-                            <label asp-for="RememberMe"
-                                   class="form-check-label"></label>
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-dark w-100 py-2">
-                            Sign In
-                        </button>
-
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="mb-0">
-                            Don't have an account?
-                            <a asp-controller="Account"
-                               asp-action="Register"
-                               class="text-decoration-none fw-semibold">
-                                Create one
-                            </a>
-                        </p>
-                    </div>
-
-                </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Explore places worth staying in</span>
             </div>
+
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Keep your bookings organised</span>
+            </div>
+
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Manage your Staybnb account</span>
+            </div>
+        </div>
+
+        <div class="auth-welcome-footer">
+            Find a place that feels like yours.
+        </div>
+    </div>
+
+    <!-- Right: Login form -->
+    <div class="auth-form-panel">
+        <div class="auth-form-content">
+
+            <div class="auth-mobile-brand">
+                <span class="auth-brand-icon">S</span>
+                <span>Staybnb</span>
+            </div>
+
+            <div class="auth-heading">
+                <span class="auth-eyebrow">GOOD TO HAVE YOU BACK</span>
+                <h2>Sign in to your account</h2>
+                <p>Enter your details to continue.</p>
+            </div>
+
+            <form asp-controller="Account"
+                  asp-action="Login"
+                  asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="auth-validation-summary">
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Email" class="form-label">
+                        Email address
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control auth-input"
+                           placeholder="name@example.com"
+                           autocomplete="username"
+                           autofocus />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger auth-field-error"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Password" class="form-label">
+                        Password
+                    </label>
+
+                    <input asp-for="Password"
+                           class="form-control auth-input"
+                           placeholder="Enter your password"
+                           autocomplete="current-password" />
+
+                    <span asp-validation-for="Password"
+                          class="text-danger auth-field-error"></span>
+                </div>
+
+                <div class="auth-form-options">
+                    <div class="form-check">
+                        <input asp-for="RememberMe"
+                               class="form-check-input" />
+
+                        <label asp-for="RememberMe"
+                               class="form-check-label">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn">
+                    Sign In
+                    <span aria-hidden="true">→</span>
+                </button>
+
+            </form>
+
+            <div class="auth-divider">
+                <span>NEW TO STAYBNB?</span>
+            </div>
+
+            <a asp-controller="Account"
+               asp-action="Register"
+               class="auth-register-btn">
+                Create an account
+            </a>
+
+            <p class="auth-terms">
+                By signing in, you can access your bookings and
+                manage your Staybnb account.
+            </p>
 
         </div>
     </div>
+
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" />
 }

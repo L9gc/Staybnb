@@ -1,112 +1,164 @@
 @model Staybnb.ViewModels.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Create Account";
+ViewData["Title"] = "Create Account";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
+<div class="auth-page">
+    <div class="auth-container">
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
+    <!-- Left: Welcome panel -->
+    <div class="auth-welcome">
+        <div class="auth-brand">
+            <span class="auth-brand-icon">S</span>
+            <span>Staybnb</span>
+        </div>
 
-                    <div class="text-center mb-4">
-                        <h1 class="h3 fw-bold">Join Staybnb</h1>
-                        <p class="text-muted">
-                            Create an account to start exploring properties.
-                        </p>
-                    </div>
+        <div class="auth-welcome-content">
+            <span class="auth-eyebrow">YOUR NEXT CHAPTER STARTS HERE</span>
 
-                    <form asp-controller="Account"
-                          asp-action="Register"
-                          method="post">
+            <h1>Make yourself at home.</h1>
 
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3">
-                        </div>
+            <p>
+                Create your Staybnb account and discover places
+                to stay, plan your next trip, and make every
+                getaway count.
+            </p>
 
-                        <div class="mb-3">
-                            <label asp-for="FullName"
-                                   class="form-label"></label>
-
-                            <input asp-for="FullName"
-                                   class="form-control"
-                                   placeholder="Enter your full name" />
-
-                            <span asp-validation-for="FullName"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email"
-                                   class="form-label"></label>
-
-                            <input asp-for="Email"
-                                   class="form-control"
-                                   placeholder="name@example.com"
-                                   autocomplete="email" />
-
-                            <span asp-validation-for="Email"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password"
-                                   class="form-label"></label>
-
-                            <input asp-for="Password"
-                                   class="form-control"
-                                   placeholder="Create a password"
-                                   autocomplete="new-password" />
-
-                            <span asp-validation-for="Password"
-                                  class="text-danger"></span>
-
-                            <small class="text-muted">
-                                Use at least 8 characters, including
-                                uppercase, lowercase, and a number.
-                            </small>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="ConfirmPassword"
-                                   class="form-label"></label>
-
-                            <input asp-for="ConfirmPassword"
-                                   class="form-control"
-                                   placeholder="Confirm your password"
-                                   autocomplete="new-password" />
-
-                            <span asp-validation-for="ConfirmPassword"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-dark w-100 py-2">
-                            Create Account
-                        </button>
-
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="mb-0">
-                            Already have an account?
-                            <a asp-controller="Account"
-                               asp-action="Login"
-                               class="text-decoration-none fw-semibold">
-                                Sign in
-                            </a>
-                        </p>
-                    </div>
-
-                </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Discover places for your next trip</span>
             </div>
+
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Manage your bookings in one place</span>
+            </div>
+
+            <div class="auth-feature">
+                <span class="auth-feature-icon">✓</span>
+                <span>Join a growing community of travellers</span>
+            </div>
+        </div>
+
+        <div class="auth-welcome-footer">
+            Your next stay is closer than you think.
+        </div>
+    </div>
+
+    <!-- Right: Registration form -->
+    <div class="auth-form-panel">
+        <div class="auth-form-content">
+
+            <div class="auth-mobile-brand">
+                <span class="auth-brand-icon">S</span>
+                <span>Staybnb</span>
+            </div>
+
+            <div class="auth-heading">
+                <span class="auth-eyebrow">GET STARTED</span>
+                <h2>Create your account</h2>
+                <p>Fill in your details to join Staybnb.</p>
+            </div>
+
+            <form asp-controller="Account"
+                  asp-action="Register"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="auth-validation-summary">
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="FullName" class="form-label">
+                        Full name
+                    </label>
+
+                    <input asp-for="FullName"
+                           class="form-control auth-input"
+                           placeholder="Enter your full name"
+                           autocomplete="name"
+                           autofocus />
+
+                    <span asp-validation-for="FullName"
+                          class="text-danger auth-field-error"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Email" class="form-label">
+                        Email address
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control auth-input"
+                           placeholder="name@example.com"
+                           autocomplete="email" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger auth-field-error"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Password" class="form-label">
+                        Password
+                    </label>
+
+                    <input asp-for="Password"
+                           class="form-control auth-input"
+                           placeholder="Create a password"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="Password"
+                          class="text-danger auth-field-error"></span>
+
+                    <small class="auth-password-hint">
+                        Use at least 8 characters, including uppercase,
+                        lowercase, and a number.
+                    </small>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="ConfirmPassword" class="form-label">
+                        Confirm password
+                    </label>
+
+                    <input asp-for="ConfirmPassword"
+                           class="form-control auth-input"
+                           placeholder="Enter your password again"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="ConfirmPassword"
+                          class="text-danger auth-field-error"></span>
+                </div>
+
+                <button type="submit" class="auth-submit-btn">
+                    Create Account
+                    <span aria-hidden="true">→</span>
+                </button>
+
+            </form>
+
+            <div class="auth-divider">
+                <span>ALREADY A MEMBER?</span>
+            </div>
+
+            <a asp-controller="Account"
+               asp-action="Login"
+               class="auth-register-btn">
+                Sign in to your account
+            </a>
+
+            <p class="auth-terms">
+                Create your account to explore properties and
+                manage your Staybnb bookings.
+            </p>
 
         </div>
     </div>
+
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" />
 }

@@ -1,155 +1,260 @@
 @model Staybnb.Models.HostApplication
+@using System.Globalization
 
 @{
 ViewData["Title"] = "Review Host Application";
+
+var zar = new CultureInfo("en-ZA");
+var applicantName = Model.Applicant?.FullName ?? "Unknown applicant";
+var initials = string.IsNullOrWhiteSpace(Model.Applicant?.FullName)
+    ? "?"
+    : string.Join("", Model.Applicant.FullName
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part => part[0]))
+        .ToUpperInvariant();
 }
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Review Host Application</h1>
+<div class="admin-review-page">
 
+```
+<div class="admin-review-topbar">
     <a asp-controller="Admin"
        asp-action="Index"
-       class="btn btn-outline-secondary">
+       class="admin-review-back">
+        <span aria-hidden="true">←</span>
         Back to Dashboard
     </a>
+
+    <span class="admin-review-reference">
+        Application #@Model.Id
+    </span>
 </div>
+
+<section class="admin-review-hero">
+    <div class="admin-review-hero-content">
+        <span class="admin-dashboard-eyebrow">HOST APPLICATION REVIEW</span>
+        <h1>Review Host Application</h1>
+        <p>Review the proposed property, verify the applicant's information, and decide whether the listing should be approved.</p>
+    </div>
+
+    <div class="admin-review-status">
+        <span class="admin-review-status-dot"></span>
+        <span>@Model.Status</span>
+    </div>
+</section>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
         @TempData["Message"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
     </div>
 }
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4 class="mb-0">Property Details</h4>
-    </div>
+<div class="admin-review-layout">
 
-    <div class="card-body">
-        <h3>@Model.Title</h3>
+    <main class="admin-review-main">
 
-        <p>
-            <strong>Description:</strong><br />
-            @Model.Description
-        </p>
+        <section class="admin-review-card">
+            <div class="admin-review-card-heading">
+                <div class="admin-review-heading-icon">⌂</div>
+                <div>
+                    <h2>Property Details</h2>
+                    <p>Information provided with the host application</p>
+                </div>
+            </div>
 
-        <p>
-            <strong>Property Type:</strong>
-            @Model.PropertyType
-        </p>
+            <div class="admin-review-property-title">
+                <h3>@Model.Title</h3>
+                <span class="admin-review-property-type">@Model.PropertyType</span>
+            </div>
 
-        <p>
-            <strong>Address:</strong>
-            @Model.Address
-        </p>
+            <div class="admin-review-detail-grid">
 
-        <p>
-            <strong>City:</strong>
-            @Model.City
-        </p>
+                <div class="admin-review-detail">
+                    <span class="admin-review-detail-label">City</span>
+                    <strong>@Model.City</strong>
+                </div>
 
-        <p>
-            <strong>Price Per Night:</strong>
-            R @Model.PricePerNight.ToString("N2")
-        </p>
+                <div class="admin-review-detail">
+                    <span class="admin-review-detail-label">Price Per Night</span>
+                    <strong class="admin-review-price">
+                        @Model.PricePerNight.ToString("C", zar)
+                    </strong>
+                </div>
 
-        <p>
-            <strong>Application Status:</strong>
-            <span class="badge bg-warning text-dark">
-                @Model.Status
-            </span>
-        </p>
+                <div class="admin-review-detail admin-review-detail-wide">
+                    <span class="admin-review-detail-label">Property Address</span>
+                    <strong>@Model.Address</strong>
+                </div>
 
-        <p>
-            <strong>Date Submitted:</strong>
-            @Model.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
-        </p>
-    </div>
-</div>
+                <div class="admin-review-detail admin-review-detail-wide">
+                    <span class="admin-review-detail-label">Description</span>
+                    <p>@Model.Description</p>
+                </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4 class="mb-0">Applicant Information</h4>
-    </div>
+                <div class="admin-review-detail">
+                    <span class="admin-review-detail-label">Date Submitted</span>
+                    <strong>@Model.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")</strong>
+                </div>
 
-    <div class="card-body">
-        <p>
-            <strong>Name:</strong>
-            @(Model.Applicant?.FullName ?? "Unknown applicant")
-        </p>
+                <div class="admin-review-detail">
+                    <span class="admin-review-detail-label">Submission Time</span>
+                    <strong>@Model.SubmittedAt.ToLocalTime().ToString("HH:mm")</strong>
+                </div>
 
-        <p>
-            <strong>Email:</strong>
-            @(Model.Applicant?.Email ?? "No email available")
-        </p>
-    </div>
-</div>
+            </div>
+        </section>
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4 class="mb-0">Property Images</h4>
-    </div>
+        <section class="admin-review-card">
+            <div class="admin-review-card-heading">
+                <div class="admin-review-heading-icon">▧</div>
+                <div>
+                    <h2>Property Images</h2>
+                    <p>Review the visual information submitted for this property</p>
+                </div>
 
-    <div class="card-body">
-        @if (Model.Images != null && Model.Images.Any())
-        {
-            <div class="row">
-                @foreach (var image in Model.Images)
-                {
-                    <div class="col-md-4 mb-3">
-                        <img src="@image.ImagePath"
-                             alt="Proposed property image"
-                             class="img-fluid rounded border"
-                             style="width: 100%; height: 240px; object-fit: cover;" />
+                <span class="admin-review-image-badge">
+                    @(Model.Images?.Count ?? 0) images
+                </span>
+            </div>
+
+            @if (Model.Images != null && Model.Images.Any())
+            {
+                <div class="admin-review-gallery">
+                    @foreach (var image in Model.Images)
+                    {
+                        <div class="admin-review-gallery-item">
+                            <img src="@image.ImagePath"
+                                 alt="Proposed property image"
+                                 loading="lazy" />
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="admin-review-no-images">
+                    <span class="admin-review-no-images-icon">▧</span>
+                    <strong>No property images available</strong>
+                    <p>No images have been uploaded for this application.</p>
+                </div>
+            }
+        </section>
+
+        <section class="admin-review-guidance">
+            <div class="admin-review-guidance-icon">!</div>
+            <div>
+                <strong>Before making a decision</strong>
+                <p>Check that the property information is complete and the submitted images are appropriate. Approving an application will allow the applicant to become a host and publish the submitted property.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <aside class="admin-review-sidebar">
+
+        <section class="admin-review-card admin-review-applicant-card">
+            <div class="admin-review-card-heading">
+                <div class="admin-review-heading-icon">♙</div>
+                <div>
+                    <h2>Applicant</h2>
+                    <p>Account information</p>
+                </div>
+            </div>
+
+            <div class="admin-review-applicant-profile">
+                <div class="admin-review-applicant-avatar">
+                    @initials
+                </div>
+
+                <div>
+                    <strong>@applicantName</strong>
+                    <span>Host applicant</span>
+                </div>
+            </div>
+
+            <div class="admin-review-applicant-field">
+                <span class="admin-review-detail-label">Email Address</span>
+                <strong class="admin-review-email">
+                    @(Model.Applicant?.Email ?? "No email available")
+                </strong>
+            </div>
+
+            <div class="admin-review-applicant-field">
+                <span class="admin-review-detail-label">Application ID</span>
+                <strong>#@Model.Id</strong>
+            </div>
+
+            <div class="admin-review-applicant-field">
+                <span class="admin-review-detail-label">Current Status</span>
+                <span class="admin-review-status-badge">
+                    @Model.Status
+                </span>
+            </div>
+        </section>
+
+        <section class="admin-review-card admin-review-decision-card">
+            <span class="admin-dashboard-eyebrow">ADMINISTRATIVE ACTION</span>
+            <h2>Application Decision</h2>
+            <p>Choose whether this host application should be approved or rejected.</p>
+
+            @if (Model.Status == "Pending")
+            {
+                <form asp-controller="Admin"
+                      asp-action="ApproveApplication"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="admin-review-action-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="admin-review-approve-btn"
+                            onclick="return confirm('Are you sure you want to approve this host application?');">
+                        <span aria-hidden="true">✓</span>
+                        Approve Application
+                    </button>
+                </form>
+
+                <form asp-controller="Admin"
+                      asp-action="RejectApplication"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="admin-review-action-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="admin-review-reject-btn"
+                            onclick="return confirm('Are you sure you want to reject this host application?');">
+                        <span aria-hidden="true">×</span>
+                        Reject Application
+                    </button>
+                </form>
+
+                <div class="admin-review-decision-note">
+                    Your decision will be recorded by the system.
+                </div>
+            }
+            else
+            {
+                <div class="admin-review-completed">
+                    <span aria-hidden="true">✓</span>
+                    <div>
+                        <strong>Application Reviewed</strong>
+                        <p>This application has already been reviewed and is no longer pending.</p>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-warning">
-                No images have been uploaded for this application.
-            </div>
-        }
-    </div>
+                </div>
+            }
+        </section>
+
+    </aside>
+
 </div>
 
-<div class="alert alert-info">
-    <strong>Review carefully:</strong>
-    Confirm that the property information and images are suitable
-    before making a decision.
-</div>
-
-@if (Model.Status == "Pending")
-{
-    <div class="d-flex gap-2">
-        <form asp-controller="Admin"
-              asp-action="ApproveApplication"
-              asp-route-id="@Model.Id"
-              method="post">
-
-            <button type="submit" class="btn btn-success">
-                Approve Application
-            </button>
-        </form>
-
-        <form asp-controller="Admin"
-              asp-action="RejectApplication"
-              asp-route-id="@Model.Id"
-              method="post">
-
-            <button type="submit" class="btn btn-danger">
-                Reject Application
-            </button>
-        </form>
-    </div>
-}
-else
-{
-    <div class="alert alert-secondary">
-        This application has already been reviewed.
-    </div>
-}
 </div>

@@ -9,14 +9,13 @@ var unreadCount = Model.Count(n => !n.IsRead);
 
 }
 
-<div class="container mt-4 mb-5">
+<div class="notifications-page">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="notifications-header">
     <div>
+        <span class="notifications-eyebrow">STAYBNB UPDATES</span>
         <h1>Notifications</h1>
-        <p class="text-muted">
-            Stay updated on your Staybnb activity.
-        </p>
+        <p>Stay informed about your bookings, messages, and account activity.</p>
     </div>
 
     @if (unreadCount > 0)
@@ -24,8 +23,8 @@ var unreadCount = Model.Count(n => !n.IsRead);
         <form asp-action="MarkAllAsRead" method="post">
             @Html.AntiForgeryToken()
 
-            <button type="submit"
-                    class="btn btn-outline-primary">
+            <button type="submit" class="notifications-mark-all">
+                <span aria-hidden="true">&#10003;</span>
                 Mark All as Read
             </button>
         </form>
@@ -34,98 +33,143 @@ var unreadCount = Model.Count(n => !n.IsRead);
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
+    <div class="notifications-alert">
+        <span class="notifications-alert-icon">&#10003;</span>
+        <span>@TempData["SuccessMessage"]</span>
     </div>
 }
 
-<div class="mb-3">
-    <span class="badge bg-primary">
-        @unreadCount unread
-    </span>
+<div class="notifications-overview">
+    <div class="notification-stat-card">
+        <div class="notification-stat-icon notification-stat-unread">
+            &#9679;
+        </div>
+        <div>
+            <span class="notification-stat-label">Unread</span>
+            <strong>@unreadCount</strong>
+        </div>
+    </div>
 
-    <span class="badge bg-secondary">
-        @Model.Count total
-    </span>
+    <div class="notification-stat-card">
+        <div class="notification-stat-icon notification-stat-total">
+            &#128276;
+        </div>
+        <div>
+            <span class="notification-stat-label">All Notifications</span>
+            <strong>@Model.Count</strong>
+        </div>
+    </div>
+</div>
+
+<div class="notifications-section-heading">
+    <div>
+        <h2>Your Activity</h2>
+        <p>Updates and important information from Staybnb.</p>
+    </div>
+
+    @if (unreadCount > 0)
+    {
+        <span class="notifications-unread-label">
+            @unreadCount unread
+        </span>
+    }
 </div>
 
 @if (!Model.Any())
 {
-    <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-            <h4>You're all caught up!</h4>
-
-            <p class="text-muted mb-0">
-                When something happens on Staybnb,
-                your notifications will appear here.
-            </p>
+    <div class="notifications-empty">
+        <div class="notifications-empty-icon">
+            <span aria-hidden="true">&#128276;</span>
         </div>
+
+        <h3>You're all caught up!</h3>
+
+        <p>
+            You don't have any notifications yet.
+            When something happens on Staybnb, your updates will appear here.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="notifications-home-btn">
+            Back to Home
+        </a>
     </div>
 }
 else
 {
-    <div class="list-group shadow-sm">
+    <div class="notifications-list">
 
         @foreach (var notification in Model)
         {
-            <div class="list-group-item p-3
-                        @(notification.IsRead ? "" : "bg-light")">
+            <div class="notification-item @(notification.IsRead ? "" : "notification-unread")">
 
-                <div class="d-flex justify-content-between
-                            align-items-start gap-3">
+                <div class="notification-item-icon @(notification.IsRead ? "notification-icon-read" : "notification-icon-new")">
+                    @if (!notification.IsRead)
+                    {
+                        <span aria-hidden="true">&#128276;</span>
+                    }
+                    else
+                    {
+                        <span aria-hidden="true">&#10003;</span>
+                    }
+                </div>
 
-                    <div class="flex-grow-1">
+                <div class="notification-item-content">
 
-                        <div class="d-flex align-items-center gap-2 mb-1">
+                    <div class="notification-item-heading">
+                        <h3>@notification.Title</h3>
 
-                            <h5 class="mb-0">
-                                @notification.Title
-                            </h5>
-
-                            @if (!notification.IsRead)
-                            {
-                                <span class="badge bg-primary">
-                                    New
-                                </span>
-                            }
-
-                        </div>
-
-                        <p class="mb-2">
-                            @notification.MessageText
-                        </p>
-
-                        <small class="text-muted">
-                            @(notification.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy, HH:mm"))
-                        </small>
+                        @if (!notification.IsRead)
+                        {
+                            <span class="notification-new-badge">NEW</span>
+                        }
                     </div>
 
-                    <div class="d-flex flex-column gap-2">
+                    <p class="notification-message">
+                        @notification.MessageText
+                    </p>
 
-                        @if (!string.IsNullOrWhiteSpace(notification.LinkUrl))
-                        {
-                            <a asp-action="Open"
-                               asp-route-id="@notification.Id"
-                               class="btn btn-sm btn-primary">
-                                View
-                            </a>
-                        }
-                        else if (!notification.IsRead)
-                        {
-                            <form asp-action="MarkAsRead"
-                                  asp-route-id="@notification.Id"
-                                  method="post">
-
-                                @Html.AntiForgeryToken()
-
-                                <button type="submit"
-                                        class="btn btn-sm btn-outline-secondary">
-                                    Mark as Read
-                                </button>
-                            </form>
-                        }
-
+                    <div class="notification-item-meta">
+                        <span class="notification-time-icon" aria-hidden="true">&#128337;</span>
+                        <span>
+                            @notification.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                        </span>
                     </div>
+                </div>
+
+                <div class="notification-item-actions">
+
+                    @if (!string.IsNullOrWhiteSpace(notification.LinkUrl))
+                    {
+                        <a asp-action="Open"
+                           asp-route-id="@notification.Id"
+                           class="notification-view-btn">
+                            View
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    }
+                    else if (!notification.IsRead)
+                    {
+                        <form asp-action="MarkAsRead"
+                              asp-route-id="@notification.Id"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="notification-read-btn">
+                                Mark as Read
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="notification-read-status">
+                            <span aria-hidden="true">&#10003;</span>
+                            Read
+                        </span>
+                    }
 
                 </div>
 
@@ -134,5 +178,10 @@ else
 
     </div>
 }
+
+<div class="notifications-footer-note">
+    <span>Staybnb</span>
+    <span>Keeping you up to date, every step of the way.</span>
+</div>
 
 </div>

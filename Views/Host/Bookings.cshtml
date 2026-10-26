@@ -1,202 +1,267 @@
 @model List<Staybnb.Models.Booking>
+@using System.Globalization
 
 @{
 ViewData["Title"] = "Manage Bookings";
+
+
+var bookings = Model ?? new List<Staybnb.Models.Booking>();
+var zar = new CultureInfo("en-ZA");
+
+var pendingBookings = bookings.Count(b => b.Status == "Pending");
+var approvedBookings = bookings.Count(b => b.Status == "Approved");
+var rejectedBookings = bookings.Count(b => b.Status == "Rejected");
+var cancelledBookings = bookings.Count(b => b.Status == "Cancelled");
+
+
 }
 
-<div class="container mt-4 mb-5">
+<div class="host-bookings-page">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
+<section class="host-bookings-hero">
+    <div class="host-bookings-hero-content">
+        <span class="host-bookings-eyebrow">HOST MANAGEMENT</span>
         <h1>Manage Bookings</h1>
-        <p class="text-muted">
-            Review and manage reservations for your properties.
-        </p>
+        <p>Keep track of reservations, review guest requests, and manage upcoming stays in one place.</p>
+
+        <div class="host-bookings-hero-meta">
+            <span class="host-bookings-meta-item">
+                <span class="host-bookings-meta-dot"></span>
+                @pendingBookings pending @(pendingBookings == 1 ? "request" : "requests")
+            </span>
+            <span class="host-bookings-meta-divider"></span>
+            <span>@bookings.Count total @(bookings.Count == 1 ? "booking" : "bookings")</span>
+        </div>
     </div>
 
     <a asp-controller="Host"
        asp-action="Index"
-       class="btn btn-outline-secondary">
+       class="host-bookings-back-btn">
+        <span aria-hidden="true">←</span>
         Back to Dashboard
     </a>
-</div>
+</section>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show host-bookings-alert" role="alert">
         @TempData["Message"]
-
         <button type="button"
                 class="btn-close"
                 data-bs-dismiss="alert"
-                aria-label="Close">
-        </button>
+                aria-label="Close"></button>
     </div>
 }
 
-@{
-    var pendingBookings = Model.Count(b => b.Status == "Pending");
-    var approvedBookings = Model.Count(b => b.Status == "Approved");
-    var rejectedBookings = Model.Count(b => b.Status == "Rejected");
-}
+<section class="host-bookings-stats">
 
-<div class="row g-3 mb-4">
+    <article class="host-booking-stat">
+        <div class="host-booking-stat-top">
+            <span class="host-booking-stat-label">Pending Requests</span>
+            <span class="host-booking-stat-icon pending-icon">◷</span>
+        </div>
+        <strong>@pendingBookings</strong>
+        <p>Awaiting your decision</p>
+    </article>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Pending Requests</h6>
-                <h3>@pendingBookings</h3>
+    <article class="host-booking-stat">
+        <div class="host-booking-stat-top">
+            <span class="host-booking-stat-label">Approved</span>
+            <span class="host-booking-stat-icon approved-icon">✓</span>
+        </div>
+        <strong>@approvedBookings</strong>
+        <p>Confirmed reservations</p>
+    </article>
+
+    <article class="host-booking-stat">
+        <div class="host-booking-stat-top">
+            <span class="host-booking-stat-label">Rejected</span>
+            <span class="host-booking-stat-icon rejected-icon">×</span>
+        </div>
+        <strong>@rejectedBookings</strong>
+        <p>Requests not accepted</p>
+    </article>
+
+    <article class="host-booking-stat">
+        <div class="host-booking-stat-top">
+            <span class="host-booking-stat-label">Cancelled</span>
+            <span class="host-booking-stat-icon cancelled-icon">−</span>
+        </div>
+        <strong>@cancelledBookings</strong>
+        <p>Cancelled reservations</p>
+    </article>
+
+</section>
+
+<section class="host-bookings-list-section">
+
+    <div class="host-bookings-section-heading">
+        <div>
+            <span class="host-bookings-eyebrow">RESERVATION OVERVIEW</span>
+            <h2>Guest Reservations</h2>
+            <p>Review booking details and respond to pending requests.</p>
+        </div>
+
+        <span class="host-bookings-count">
+            @bookings.Count @(bookings.Count == 1 ? "reservation" : "reservations")
+        </span>
+    </div>
+
+    @if (!bookings.Any())
+    {
+        <div class="host-bookings-empty">
+            <div class="host-bookings-empty-icon">⌂</div>
+            <h3>No bookings yet</h3>
+            <p>When guests request to stay at one of your properties, their reservations will appear here.</p>
+            <a asp-controller="Host"
+               asp-action="Index"
+               class="btn host-bookings-empty-btn">
+                Return to Dashboard
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="host-bookings-table-card">
+            <div class="host-bookings-table-scroll">
+                <table class="host-bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Property & Guest</th>
+                            <th>Stay Dates</th>
+                            <th>Guests</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                            <th class="host-bookings-actions-heading">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var booking in bookings)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="host-booking-property">
+                                        <div class="host-booking-property-icon">⌂</div>
+                                        <div class="host-booking-property-info">
+                                            <strong>@(booking.Property?.Title ?? "Unknown property")</strong>
+                                            <span>@(booking.Property?.City ?? "Location unavailable")</span>
+                                            <small>Guest: @(booking.Guest?.FullName ?? "Unknown guest")</small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="host-booking-dates">
+                                        <div>
+                                            <span>CHECK-IN</span>
+                                            <strong>@booking.CheckInDate.ToString("dd MMM yyyy")</strong>
+                                        </div>
+                                        <div>
+                                            <span>CHECK-OUT</span>
+                                            <strong>@booking.CheckOutDate.ToString("dd MMM yyyy")</strong>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="host-booking-guests">
+                                        <span aria-hidden="true">♙</span>
+                                        @booking.NumberOfGuests
+                                        @(booking.NumberOfGuests == 1 ? "guest" : "guests")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="host-booking-total">
+                                        @booking.TotalPrice.ToString("C", zar)
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @switch (booking.Status)
+                                    {
+                                        case "Pending":
+                                            <span class="host-booking-status status-pending">
+                                                <span></span> Pending
+                                            </span>
+                                            break;
+
+                                        case "Approved":
+                                            <span class="host-booking-status status-approved">
+                                                <span></span> Approved
+                                            </span>
+                                            break;
+
+                                        case "Rejected":
+                                            <span class="host-booking-status status-rejected">
+                                                <span></span> Rejected
+                                            </span>
+                                            break;
+
+                                        case "Cancelled":
+                                            <span class="host-booking-status status-cancelled">
+                                                <span></span> Cancelled
+                                            </span>
+                                            break;
+
+                                        default:
+                                            <span class="host-booking-status status-cancelled">
+                                                <span></span> @booking.Status
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (booking.Status == "Pending")
+                                    {
+                                        <div class="host-booking-action-buttons">
+
+                                            <form asp-controller="Host"
+                                                  asp-action="ApproveBooking"
+                                                  asp-route-id="@booking.Id"
+                                                  method="post">
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="host-booking-approve-btn">
+                                                    Approve
+                                                </button>
+                                            </form>
+
+                                            <form asp-controller="Host"
+                                                  asp-action="RejectBooking"
+                                                  asp-route-id="@booking.Id"
+                                                  method="post">
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="host-booking-reject-btn">
+                                                    Reject
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="host-booking-no-action">No action required</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="host-bookings-table-footer">
+                <span>Showing @bookings.Count @(bookings.Count == 1 ? "reservation" : "reservations")</span>
+                <span>Staybnb Host Management</span>
             </div>
         </div>
-    </div>
+    }
 
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Approved Bookings</h6>
-                <h3>@approvedBookings</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Rejected Bookings</h6>
-                <h3>@rejectedBookings</h3>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-secondary">
-        <h5>No bookings yet</h5>
-        <p class="mb-0">
-            Booking requests for your properties will appear here.
-        </p>
-    </div>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-
-            <thead class="table-dark">
-                <tr>
-                    <th>Property</th>
-                    <th>Guest</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
-                    <th>Guests</th>
-                    <th>Total Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var booking in Model)
-                {
-                    <tr>
-                        <td>
-                            <strong>
-                                @(booking.Property?.Title ?? "Unknown property")
-                            </strong>
-                        </td>
-
-                        <td>
-                            @(booking.Guest?.FullName ?? "Unknown guest")
-                        </td>
-
-                        <td>
-                            @booking.CheckInDate.ToString("dd MMM yyyy")
-                        </td>
-
-                        <td>
-                            @booking.CheckOutDate.ToString("dd MMM yyyy")
-                        </td>
-
-                        <td>
-                            @booking.NumberOfGuests
-                        </td>
-
-                        <td>
-                            R @booking.TotalPrice.ToString("N2")
-                        </td>
-
-                        <td>
-                            @switch (booking.Status)
-                            {
-                                case "Pending":
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                    break;
-
-                                case "Approved":
-                                    <span class="badge bg-success">Approved</span>
-                                    break;
-
-                                case "Rejected":
-                                    <span class="badge bg-danger">Rejected</span>
-                                    break;
-
-                                case "Cancelled":
-                                    <span class="badge bg-secondary">Cancelled</span>
-                                    break;
-
-                                default:
-                                    <span class="badge bg-secondary">@booking.Status</span>
-                                    break;
-                            }
-                        </td>
-
-                        <td>
-                            @if (booking.Status == "Pending")
-                            {
-                                <div class="d-flex gap-2">
-
-                                    <form asp-controller="Host"
-                                          asp-action="ApproveBooking"
-                                          asp-route-id="@booking.Id"
-                                          method="post">
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-success btn-sm">
-                                            Approve
-                                        </button>
-                                    </form>
-
-                                    <form asp-controller="Host"
-                                          asp-action="RejectBooking"
-                                          asp-route-id="@booking.Id"
-                                          method="post">
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-danger btn-sm">
-                                            Reject
-                                        </button>
-                                    </form>
-
-                                </div>
-                            }
-                            else
-                            {
-                                <span class="text-muted">No actions available</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-
-        </table>
-    </div>
-}
+</section>
 
 </div>

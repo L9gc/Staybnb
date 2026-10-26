@@ -122,6 +122,13 @@ else
                             View Property
                         </a>
 
+                        <a asp-controller="Host"
+   asp-action="CheckInSettings"
+   asp-route-id="@property.Id"
+   class="btn btn-outline-primary">
+    Check-in Settings
+</a>
+
                         <form asp-controller="Host"
                               asp-action="ToggleListing"
                               asp-route-id="@property.Id"

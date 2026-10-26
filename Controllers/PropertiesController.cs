@@ -14,16 +14,44 @@ public PropertiesController(ApplicationDbContext context)
 }
 
 // GET: /Properties
-public async Task<IActionResult> Index()
+public async Task<IActionResult> Index(string? city, string? propertyType)
 {
-    var properties = await _context.Properties
-        .AsNoTracking()
-        .Where(p => p.IsActive)
-        .OrderByDescending(p => p.CreatedAt)
-        .ToListAsync();
+var propertiesQuery = _context.Properties
+.AsNoTracking()
+.Include(p => p.Images)
+.Where(p => p.IsActive);
 
-    return View(properties);
+
+if (!string.IsNullOrWhiteSpace(city))
+{
+    propertiesQuery = propertiesQuery.Where(p =>
+        p.City.Contains(city));
 }
+
+if (!string.IsNullOrWhiteSpace(propertyType))
+{
+    propertiesQuery = propertiesQuery.Where(p =>
+        p.PropertyType == propertyType);
+}
+
+ViewBag.City = city;
+ViewBag.PropertyType = propertyType;
+
+ViewBag.PropertyTypes = await _context.Properties
+    .Where(p => p.IsActive)
+    .Select(p => p.PropertyType)
+    .Distinct()
+    .OrderBy(type => type)
+    .ToListAsync();
+
+var properties = await propertiesQuery
+    .OrderByDescending(p => p.CreatedAt)
+    .ToListAsync();
+
+return View(properties);
+
+}
+
 
 // GET: /Properties/Details/5
 public async Task<IActionResult> Details(int? id)

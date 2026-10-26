@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Staybnb.Data;
 using System.Security.Claims;
 using Staybnb.Models;
+using Staybnb.ViewModels;
 
 namespace Staybnb.Controllers;
 
@@ -157,5 +158,81 @@ public async Task<IActionResult> RejectBooking(int id)
     TempData["Message"] = "Booking rejected successfully.";
 
     return RedirectToAction(nameof(Bookings));
+}
+// Display the check-in settings for a property.
+[HttpGet]
+public async Task<IActionResult> CheckInSettings(int id)
+{
+    var hostId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var property = await _context.Properties
+        .AsNoTracking()
+        .FirstOrDefaultAsync(p => p.Id == id && p.HostId == hostId);
+
+    if (property == null)
+    {
+        return NotFound();
+    }
+
+    var settings = await _context.CheckInProcesses
+        .AsNoTracking()
+        .FirstOrDefaultAsync(c => c.PropertyId == id);
+
+    var viewModel = new CheckInProcessViewModel
+    {
+        PropertyId = property.Id,
+        PropertyTitle = property.Title,
+        Rules = settings?.Rules ?? string.Empty,
+        RequiredDocuments = settings?.RequiredDocuments ?? string.Empty
+    };
+
+    return View(viewModel);
+}
+
+// Save the check-in settings for a property.
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> CheckInSettings(CheckInProcessViewModel model)
+{
+    var hostId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var property = await _context.Properties
+        .FirstOrDefaultAsync(p =>
+            p.Id == model.PropertyId && p.HostId == hostId);
+
+    if (property == null)
+    {
+        return NotFound();
+    }
+
+    model.PropertyTitle = property.Title;
+
+    if (!ModelState.IsValid)
+    {
+        return View(model);
+    }
+
+    var settings = await _context.CheckInProcesses
+        .FirstOrDefaultAsync(c => c.PropertyId == model.PropertyId);
+
+    if (settings == null)
+    {
+        settings = new CheckInProcess
+        {
+            PropertyId = property.Id
+        };
+
+        _context.CheckInProcesses.Add(settings);
+    }
+
+    settings.Rules = model.Rules;
+    settings.RequiredDocuments = model.RequiredDocuments;
+    settings.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    TempData["Message"] = "Check-in instructions saved successfully.";
+
+    return RedirectToAction(nameof(CheckInSettings), new { id = property.Id });
 }
 }

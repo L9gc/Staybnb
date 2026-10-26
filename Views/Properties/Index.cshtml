@@ -2,127 +2,267 @@
 
 @{
 ViewData["Title"] = "Explore Properties";
+var propertyCount = Model.Count();
 }
 
-<div class="container py-4">
-    <div class="mb-5">
-        <p class="text-uppercase text-muted fw-semibold small mb-2">
-            Find your next stay
+<div class="explore-page">
+
+<!-- Page Header -->
+<section class="explore-hero">
+    <div class="explore-hero-content">
+        <span class="section-eyebrow">YOUR NEXT STAY STARTS HERE</span>
+
+        <h1>Find your place<br />in the <span>world.</span></h1>
+
+        <p>
+            From cosy homes to city apartments, discover a place
+            that makes your next trip feel special.
         </p>
 
-    <h1 class="display-5 fw-bold">Explore Properties</h1>
-
-    <p class="text-muted">
-        Discover places to stay for your next trip, getaway, or adventure.
-    </p>
-</div>
-
-<form asp-controller="Properties" asp-action="Index" method="get"
-      class="row g-3 mb-4">
-
-    <div class="col-md-5">
-        <label for="city" class="form-label">City</label>
-        <input type="text"
-               id="city"
-               name="city"
-               value="@ViewBag.City"
-               class="form-control"
-               placeholder="e.g. Durban" />
+        <div class="explore-hero-meta">
+            <span class="explore-meta-dot"></span>
+            Explore stays available on Staybnb.
+        </div>
     </div>
 
-    <div class="col-md-5">
-        <label for="propertyType" class="form-label">Property Type</label>
-        <select id="propertyType"
-                name="propertyType"
-                class="form-select">
+    <div class="explore-hero-art">
+        <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=85"
+             alt="A welcoming modern accommodation interior" />
 
-            <option value="">All property types</option>
+        <div class="explore-image-label">
+            <span>MAKE YOURSELF AT HOME</span>
+            <strong>Your next adventure awaits.</strong>
+        </div>
+    </div>
+</section>
 
-            @foreach (var type in ViewBag.PropertyTypes)
-            {
-                <option value="@type"
-                        selected="@(ViewBag.PropertyType == type)">
-                    @type
-                </option>
-            }
-        </select>
+<!-- Search and Filters -->
+<section class="explore-search-section">
+
+    <div class="explore-section-heading">
+        <div>
+            <span class="section-eyebrow">LET'S FIND YOUR STAY</span>
+            <h2>Where are you headed?</h2>
+        </div>
+
+        <span class="explore-heading-symbol" aria-hidden="true">✳</span>
     </div>
 
-    <div class="col-md-2 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">
-            Search
+    <form asp-controller="Properties"
+          asp-action="Index"
+          method="get"
+          class="explore-search-form">
+
+        <div class="explore-filter-field">
+            <label for="city">Destination</label>
+
+            <input type="text"
+                   id="city"
+                   name="city"
+                   value="@ViewBag.City"
+                   placeholder="Enter a city, e.g. Durban" />
+        </div>
+
+        <div class="explore-filter-divider"></div>
+
+        <div class="explore-filter-field">
+            <label for="propertyType">Property type</label>
+
+            <select id="propertyType" name="propertyType">
+                <option value="">All property types</option>
+
+                @if (ViewBag.PropertyTypes != null)
+                {
+                    foreach (var type in ViewBag.PropertyTypes)
+                    {
+                        <option value="@type"
+                                selected="@((string?)ViewBag.PropertyType == (string)type)">
+                            @type
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="explore-search-button">
+            <span aria-hidden="true">&#9906;</span>
+            Find stays
         </button>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace((string?)ViewBag.City)
+        || !string.IsNullOrWhiteSpace((string?)ViewBag.PropertyType))
+    {
+        <div class="explore-active-filters">
+            <span>Showing filtered results</span>
+
+            <a asp-controller="Properties"
+               asp-action="Index"
+               class="explore-clear-filters">
+                Clear filters &times;
+            </a>
+        </div>
+    }
+</section>
+
+<!-- Property Listings -->
+<section class="explore-listings-section">
+
+    <div class="explore-listings-heading">
+        <div>
+            <span class="section-eyebrow">DISCOVER STAYBNB</span>
+            <h2>
+                @if (propertyCount == 1)
+                {
+                    <text>One place to discover.</text>
+                }
+                else
+                {
+                    <text>Places worth discovering.</text>
+                }
+            </h2>
+
+            <p>
+                @propertyCount
+                @(propertyCount == 1 ? "property" : "properties")
+                @(propertyCount == 1 ? "matches" : "match") your search.
+            </p>
+        </div>
     </div>
-</form>
 
-@if (!Model.Any())
-{
-    <div class="text-center py-5 border rounded-4">
-        <h2 class="h4">No properties available yet</h2>
+    @if (!Model.Any())
+    {
+        <div class="explore-empty-state">
+            <div class="explore-empty-icon" aria-hidden="true">⌂</div>
 
-        <p class="text-muted mb-0">
-            We're preparing new places for you to explore.
-            Please check back soon.
+            <span class="section-eyebrow">NOT FOUND? NOT A PROBLEM.</span>
+
+            <h3>No properties found.</h3>
+
+            <p>
+                We couldn't find any properties matching your search.
+                Try another destination or choose a different property type.
+            </p>
+
+            <a asp-controller="Properties"
+               asp-action="Index"
+               class="btn btn-primary">
+                View all properties
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="explore-property-grid">
+
+            @foreach (var property in Model)
+            {
+                var firstImage = property.Images.FirstOrDefault();
+
+                <article class="explore-property-card">
+
+                    <a asp-controller="Properties"
+                       asp-action="Details"
+                       asp-route-id="@property.Id"
+                       class="explore-property-image">
+
+                        @if (firstImage != null)
+                        {
+                            <img src="@firstImage.ImagePath"
+                                 alt="@property.Title"
+                                 loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="explore-image-placeholder">
+                                <span aria-hidden="true">⌂</span>
+                                <span>Staybnb</span>
+                            </div>
+                        }
+
+                        <span class="explore-property-badge">
+                            Available
+                        </span>
+                    </a>
+
+                    <div class="explore-property-body">
+
+                        <div class="explore-property-location">
+                            <span aria-hidden="true">⌖</span>
+                            @property.City
+                            <span class="location-separator">·</span>
+                            @property.PropertyType
+                        </div>
+
+                        <h3>
+                            <a asp-controller="Properties"
+                               asp-action="Details"
+                               asp-route-id="@property.Id">
+                                @property.Title
+                            </a>
+                        </h3>
+
+                        <p class="explore-property-description">
+                            @if (!string.IsNullOrWhiteSpace(property.Description))
+                            {
+                                @(property.Description.Length > 105
+                                    ? property.Description[..105] + "..."
+                                    : property.Description)
+                            }
+                            else
+                            {
+                                <text>Discover this property on Staybnb.</text>
+                            }
+                        </p>
+
+                        <div class="explore-property-footer">
+
+                            <div class="explore-property-price">
+                                <strong>
+                                    @property.PricePerNight.ToString(
+                                        "C",
+                                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
+                                </strong>
+
+                                <span>per night</span>
+                            </div>
+
+                            <a asp-controller="Properties"
+                               asp-action="Details"
+                               asp-route-id="@property.Id"
+                               class="explore-view-button">
+                                View stay
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
+
+                        </div>
+                    </div>
+                </article>
+            }
+
+        </div>
+    }
+
+</section>
+
+<!-- Host Call to Action -->
+<section class="explore-host-banner">
+    <div>
+        <span class="section-eyebrow">HAVE A PLACE TO SHARE?</span>
+
+        <h2>Make room for someone's next adventure.</h2>
+
+        <p>
+            Share your space with travellers and start your journey as a
+            Staybnb host.
         </p>
     </div>
-}
-else
-{
-    <div class="row g-4">
-        @foreach (var property in Model)
-        {
-            <div class="col-sm-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
 
-                    @if (property.Images.Any())
-                    {
-                        <img src="@property.Images.First().ImagePath"
-                             class="card-img-top"
-                             alt="@property.Title"
-                             style="height: 230px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <div class="d-flex align-items-center justify-content-center bg-light"
-                             style="height: 230px;">
-                            <span class="text-muted">No image available</span>
-                        </div>
-                    }
-
-                    <div class="card-body p-4">
-                        <p class="small text-muted mb-2">
-                            @property.City · @property.PropertyType
-                        </p>
-
-                        <h2 class="h5 fw-bold">@property.Title</h2>
-
-                        <p class="text-muted">
-                            @(
-                                property.Description.Length > 100
-                                    ? property.Description[..100] + "..."
-                                    : property.Description
-                            )
-                        </p>
-
-                        <p class="mb-3">
-                            <strong>
-                                @property.PricePerNight.ToString("C", 
-                                    System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
-                            </strong>
-                            <span class="text-muted"> / night</span>
-                        </p>
-
-                        <a asp-controller="Properties"
-                           asp-action="Details"
-                           asp-route-id="@property.Id"
-                           class="btn btn-dark w-100">
-                            View Property
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
+    <a asp-controller="HostApplications"
+       asp-action="Create"
+       class="btn btn-dark btn-lg">
+        Become a host <span aria-hidden="true">&rarr;</span>
+    </a>
+</section>
 
 </div>

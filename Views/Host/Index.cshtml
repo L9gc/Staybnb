@@ -1,184 +1,213 @@
 @model List<Staybnb.Models.Property>
+@using System.Globalization
 
 @{
 ViewData["Title"] = "Host Dashboard";
+var zar = new CultureInfo("en-ZA");
+var totalProperties = Model.Count;
+var activeProperties = Model.Count(p => p.IsActive);
+var inactiveProperties = totalProperties - activeProperties;
 }
 
-<div class="container mt-4 mb-5">
+<div class="host-dashboard">
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-    <div>
+<section class="host-dashboard-hero">
+    <div class="host-dashboard-hero-content">
+        <span class="host-dashboard-eyebrow">YOUR HOSTING SPACE</span>
         <h1>Host Dashboard</h1>
-        <p class="text-muted mb-0">
-            Manage your property listings and availability.
-        </p>
+        <p>Manage your properties, monitor availability, and prepare for your next guests.</p>
+
+        <div class="host-dashboard-hero-actions">
+            <a asp-controller="Host" asp-action="Bookings" class="btn host-btn-primary">
+                Manage Bookings
+            </a>
+
+            <a asp-controller="Host" asp-action="Documents" class="btn host-btn-secondary">
+                Review Guest Documents
+            </a>
+        </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2">
-        <a asp-controller="Host"
-           asp-action="Bookings"
-           class="btn btn-primary">
-            Manage Bookings
-        </a>
-
-        <a asp-controller="Host"
-           asp-action="Documents"
-           class="btn btn-outline-primary">
-            Review Guest Documents
-        </a>
+    <div class="host-dashboard-hero-decoration" aria-hidden="true">
+        <div class="host-dashboard-decoration-circle"></div>
+        <div class="host-dashboard-decoration-card">
+            <span class="host-decoration-icon">⌂</span>
+            <span>Your properties</span>
+            <strong>@totalProperties</strong>
+            <small>Listings managed</small>
+        </div>
     </div>
-</div>
+</section>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show host-dashboard-alert" role="alert">
         @TempData["Message"]
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close">
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title">My Properties</h5>
-
-        <p class="card-text">
-            Total listings: <strong>@Model.Count</strong>
-        </p>
-
-        <p class="card-text">
-            Active listings:
-            <strong>@Model.Count(p => p.IsActive)</strong>
-        </p>
-
-        <p class="card-text">
-            Inactive listings:
-            <strong>@Model.Count(p => !p.IsActive)</strong>
-        </p>
+<section class="host-dashboard-stats">
+    <div class="host-stat-card">
+        <div class="host-stat-icon">⌂</div>
+        <div>
+            <span class="host-stat-label">Total Properties</span>
+            <strong>@totalProperties</strong>
+            <small>All your listings</small>
+        </div>
     </div>
-</div>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-secondary">
-        <h5>No properties found</h5>
-        <p class="mb-0">
-            You don't have any property listings associated with your account yet.
-        </p>
+    <div class="host-stat-card">
+        <div class="host-stat-icon host-stat-icon-active">✓</div>
+        <div>
+            <span class="host-stat-label">Active Listings</span>
+            <strong>@activeProperties</strong>
+            <small>Currently available to browse</small>
+        </div>
     </div>
-}
-else
-{
-    <div class="row g-4">
 
-        @foreach (var property in Model)
-        {
-            <div class="col-md-6 col-lg-4">
+    <div class="host-stat-card">
+        <div class="host-stat-icon host-stat-icon-inactive">Ⅱ</div>
+        <div>
+            <span class="host-stat-label">Inactive Listings</span>
+            <strong>@inactiveProperties</strong>
+            <small>Temporarily unavailable</small>
+        </div>
+    </div>
+</section>
 
-                <div class="card h-100 shadow-sm">
+<section class="host-listings-section">
+    <div class="host-section-heading">
+        <div>
+            <span class="host-dashboard-eyebrow">PROPERTY MANAGEMENT</span>
+            <h2>My Properties</h2>
+            <p>Review your listings and manage their availability.</p>
+        </div>
 
-                    @if (property.Images != null && property.Images.Any())
-                    {
-                        <img src="@property.Images.First().ImagePath"
-                             class="card-img-top"
-                             alt="@property.Title"
-                             style="height: 220px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <div class="bg-light d-flex align-items-center justify-content-center"
-                             style="height: 220px;">
-                            <span class="text-muted">No image available</span>
+        <span class="host-listing-count">
+            @totalProperties @(totalProperties == 1 ? "property" : "properties")
+        </span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="host-empty-state">
+            <div class="host-empty-icon">⌂</div>
+            <h3>No properties yet</h3>
+            <p>You don't have any property listings associated with your account yet.</p>
+            <p class="host-empty-hint">Once a host application is approved, your property will appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="host-property-grid">
+            @foreach (var property in Model)
+            {
+                var firstImage = property.Images?.FirstOrDefault();
+
+                <article class="host-property-card">
+
+                    <div class="host-property-image-wrap">
+                        @if (firstImage != null && !string.IsNullOrWhiteSpace(firstImage.ImagePath))
+                        {
+                            <img src="@firstImage.ImagePath"
+                                 class="host-property-image"
+                                 alt="@property.Title" />
+                        }
+                        else
+                        {
+                            <div class="host-property-no-image">
+                                <span>⌂</span>
+                                <p>No image available</p>
+                            </div>
+                        }
+
+                        <span class="host-property-status @(property.IsActive ? "is-active" : "is-inactive")">
+                            <span class="host-status-dot"></span>
+                            @(property.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </div>
+
+                    <div class="host-property-content">
+                        <div class="host-property-heading">
+                            <div>
+                                <p class="host-property-location">⌖ @property.City</p>
+                                <h3>@property.Title</h3>
+                            </div>
                         </div>
-                    }
 
-                    <div class="card-body">
-
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-
-                            <h5 class="card-title mb-0">
-                                @property.Title
-                            </h5>
-
-                            @if (property.IsActive)
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">Inactive</span>
-                            }
-
-                        </div>
-
-                        <p class="text-muted mb-2">
-                            @property.City
-                        </p>
-
-                        <p class="card-text">
+                        <p class="host-property-description">
                             @property.Description
                         </p>
 
-                        <h5 class="mb-3">
-                            R @property.PricePerNight.ToString("N2")
-                            <small class="text-muted fs-6">/ night</small>
-                        </h5>
+                        <div class="host-property-meta">
+                            <span>@property.PropertyType</span>
+                        </div>
 
-                        <p class="small text-muted">
-                            Property type: @property.PropertyType
-                        </p>
+                        <div class="host-property-price">
+                            <strong>@property.PricePerNight.ToString("C", zar)</strong>
+                            <span>/ night</span>
+                        </div>
 
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-
+                        <div class="host-property-actions">
                             <a asp-controller="Properties"
                                asp-action="Details"
                                asp-route-id="@property.Id"
-                               class="btn btn-outline-primary btn-sm">
+                               class="btn host-property-view-btn">
                                 View Property
                             </a>
 
                             <a asp-controller="Host"
                                asp-action="CheckInSettings"
                                asp-route-id="@property.Id"
-                               class="btn btn-outline-primary btn-sm">
+                               class="btn host-property-settings-btn">
                                 Check-in Settings
                             </a>
-
                         </div>
 
                         <form asp-controller="Host"
                               asp-action="ToggleListing"
                               asp-route-id="@property.Id"
-                              method="post">
+                              method="post"
+                              class="host-property-toggle-form">
 
                             @Html.AntiForgeryToken()
 
                             @if (property.IsActive)
                             {
-                                <button type="submit"
-                                        class="btn btn-danger w-100">
+                                <button type="submit" class="btn host-property-toggle-btn deactivate">
                                     Deactivate Listing
                                 </button>
                             }
                             else
                             {
-                                <button type="submit"
-                                        class="btn btn-success w-100">
+                                <button type="submit" class="btn host-property-toggle-btn activate">
                                     Activate Listing
                                 </button>
                             }
-
                         </form>
-
                     </div>
-                </div>
-            </div>
-        }
+                </article>
+            }
+        </div>
+    }
+</section>
+
+<section class="host-dashboard-help">
+    <div>
+        <span class="host-dashboard-eyebrow">STAY ORGANIZED</span>
+        <h2>Ready for your next guest?</h2>
+        <p>Keep your booking requests, guest documents, and check-in instructions up to date.</p>
     </div>
-}
+
+    <div class="host-dashboard-help-actions">
+        <a asp-controller="Host" asp-action="Bookings" class="btn host-help-btn">
+            View Bookings
+        </a>
+        <a asp-controller="Host" asp-action="Documents" class="host-help-link">
+            Review Documents →
+        </a>
+    </div>
+</section>
 
 </div>

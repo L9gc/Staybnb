@@ -2,118 +2,262 @@
 
 @{
 ViewData["Title"] = Model.Title;
+var zar = System.Globalization.CultureInfo.GetCultureInfo("en-ZA");
+var images = Model.Images.ToList();
+var mainImage = images.FirstOrDefault();
 }
 
-<div class="container py-4">
+<div class="property-details-page">
+
+<!-- Breadcrumb -->
+<div class="property-details-topbar">
     <a asp-controller="Properties"
        asp-action="Index"
-       class="text-decoration-none text-muted">
-        &larr; Back to properties
+       class="property-back-link">
+        <span aria-hidden="true">&larr;</span> Back to properties
     </a>
 
-<div class="mt-4 mb-4">
-    <h1 class="display-5 fw-bold">@Model.Title</h1>
-
-    <p class="text-muted">
-        @Model.City, @Model.Address
-    </p>
+    <span class="property-details-brand">STAYBNB <span>.</span></span>
 </div>
 
-@if (Model.Images.Any())
-{
-    <div class="row g-3 mb-5">
-        @foreach (var image in Model.Images)
-        {
-            <div class="col-md-6">
-                <img src="@image.ImagePath"
-                     alt="@Model.Title"
-                     class="img-fluid rounded-4 w-100"
-                     style="height: 300px; object-fit: cover;" />
-            </div>
-        }
-    </div>
-}
-else
-{
-    <div class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-5"
-         style="height: 300px;">
-        <p class="text-muted mb-0">No property images available yet.</p>
-    </div>
-}
+<!-- Property Heading -->
+<section class="property-details-heading">
+    <div>
+        <span class="section-eyebrow">@Model.PropertyType · @Model.City</span>
+        <h1>@Model.Title</h1>
 
-<div class="row g-5">
-    <div class="col-lg-8">
-        <h2 class="h4 fw-bold mb-3">About this property</h2>
-
-        <p>@Model.Description</p>
-
-        <hr class="my-4" />
-
-        <h2 class="h5 fw-bold mb-3">Property information</h2>
-
-        <p>
-            <strong>Property type:</strong>
-            @Model.PropertyType
-        </p>
-
-        <p>
-            <strong>Location:</strong>
-            @Model.City
-        </p>
-
-        <p>
-            <strong>Address:</strong>
-            @Model.Address
+        <p class="property-address">
+            <span aria-hidden="true">&#9906;</span>
+            @Model.Address, @Model.City
         </p>
     </div>
 
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4">
-                <h2 class="h4 fw-bold">
-                    @Model.PricePerNight.ToString("C",
-                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
-                    <span class="fs-6 fw-normal text-muted">/ night</span>
-                </h2>
+    <div class="property-heading-price">
+        <strong>@Model.PricePerNight.ToString("C", zar)</strong>
+        <span>per night</span>
+    </div>
+</section>
 
-                <hr />
+<!-- Image Gallery -->
+<section class="property-gallery" aria-label="Property photos">
 
-                <p class="text-muted small">
-                    Cleaning fee:
-                    @Model.CleaningFee.ToString("C",
-                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
-                </p>
-
-                <p class="text-muted small">
-                    Service fee:
-                    @Model.ServiceFee.ToString("C",
-                        System.Globalization.CultureInfo.GetCultureInfo("en-ZA"))
-                </p>
-
-                <p class="small text-muted">
-                    Booking functionality will be available in a later stage.
-                </p>
-
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Bookings"
-                       asp-action="Create"
-                       asp-route-propertyId="@Model.Id"
-                       class="btn btn-dark w-100">
-                        Book This Property
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="Account"
-                       asp-action="Login"
-                       class="btn btn-dark w-100">
-                        Sign In to Book
-                    </a>
-                }
-            </div>
+    @if (mainImage != null)
+    {
+        <div class="property-gallery-main">
+            <img src="@mainImage.ImagePath"
+                 alt="Main photo of @Model.Title" />
+            <span class="property-gallery-label">YOUR NEXT STAY</span>
         </div>
-    </div>
+
+        <div class="property-gallery-side">
+            @foreach (var image in images.Skip(1).Take(4))
+            {
+                <div class="property-gallery-thumbnail">
+                    <img src="@image.ImagePath"
+                         alt="Photo of @Model.Title"
+                         loading="lazy" />
+                </div>
+            }
+
+            @if (images.Count == 1)
+            {
+                <div class="property-gallery-placeholder">
+                    <span aria-hidden="true">⌂</span>
+                    <p>Your next adventure starts here.</p>
+                </div>
+            }
+            else if (images.Count == 2)
+            {
+                <div class="property-gallery-placeholder">
+                    <span aria-hidden="true">✳</span>
+                    <p>Make yourself at home.</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="property-gallery-empty">
+            <span aria-hidden="true">⌂</span>
+            <h2>Your next stay awaits.</h2>
+            <p>Photos for this property haven't been added yet.</p>
+        </div>
+    }
+
+</section>
+
+<!-- Main Content -->
+<div class="property-details-layout">
+
+    <main class="property-details-main">
+
+        <!-- About -->
+        <section class="property-content-section">
+            <span class="section-eyebrow">GET TO KNOW THE PLACE</span>
+            <h2>About this property</h2>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p class="property-description">@Model.Description</p>
+            }
+            else
+            {
+                <p class="property-description">
+                    More information about this property will be available soon.
+                </p>
+            }
+        </section>
+
+        <div class="property-details-divider"></div>
+
+        <!-- Information -->
+        <section class="property-content-section">
+            <span class="section-eyebrow">THE ESSENTIALS</span>
+            <h2>Property information</h2>
+
+            <div class="property-info-grid">
+
+                <div class="property-info-item">
+                    <span class="property-info-icon" aria-hidden="true">⌂</span>
+                    <div>
+                        <span>Property type</span>
+                        <strong>@Model.PropertyType</strong>
+                    </div>
+                </div>
+
+                <div class="property-info-item">
+                    <span class="property-info-icon" aria-hidden="true">⌖</span>
+                    <div>
+                        <span>Destination</span>
+                        <strong>@Model.City</strong>
+                    </div>
+                </div>
+
+                <div class="property-info-item property-info-address">
+                    <span class="property-info-icon" aria-hidden="true">⌑</span>
+                    <div>
+                        <span>Address</span>
+                        <strong>@Model.Address</strong>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="property-details-divider"></div>
+
+        <!-- Fees -->
+        <section class="property-content-section">
+            <span class="section-eyebrow">CLEAR PRICING</span>
+            <h2>Understand the cost</h2>
+
+            <p class="property-fees-intro">
+                Your final booking total depends on the length of your stay
+                and the applicable fees.
+            </p>
+
+            <div class="property-fee-row">
+                <span>Nightly rate</span>
+                <strong>@Model.PricePerNight.ToString("C", zar)</strong>
+            </div>
+
+            <div class="property-fee-row">
+                <span>Cleaning fee per booking</span>
+                <strong>@Model.CleaningFee.ToString("C", zar)</strong>
+            </div>
+
+            <div class="property-fee-row">
+                <span>Service fee per booking</span>
+                <strong>@Model.ServiceFee.ToString("C", zar)</strong>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Booking Card -->
+    <aside class="property-booking-sidebar">
+
+        <div class="property-booking-card">
+
+            <span class="section-eyebrow">YOUR STAY STARTS HERE</span>
+
+            <div class="property-booking-price">
+                <strong>@Model.PricePerNight.ToString("C", zar)</strong>
+                <span>/ night</span>
+            </div>
+
+            <p class="property-booking-description">
+                Found your next destination? Continue to arrange your stay.
+            </p>
+
+            <div class="property-booking-summary">
+                <div>
+                    <span>Nightly rate</span>
+                    <strong>@Model.PricePerNight.ToString("C", zar)</strong>
+                </div>
+
+                <div>
+                    <span>Cleaning fee</span>
+                    <strong>@Model.CleaningFee.ToString("C", zar)</strong>
+                </div>
+
+                <div>
+                    <span>Service fee</span>
+                    <strong>@Model.ServiceFee.ToString("C", zar)</strong>
+                </div>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Bookings"
+                   asp-action="Create"
+                   asp-route-propertyId="@Model.Id"
+                   class="property-booking-button">
+                    Book this property
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="property-booking-button">
+                    Sign in to book
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+
+                <p class="property-login-hint">
+                    Sign in to continue with your booking.
+                </p>
+            }
+
+            <div class="property-booking-note">
+                <span aria-hidden="true">✳</span>
+                <p>
+                    Your final total will be calculated when you select
+                    your check-in and check-out dates.
+                </p>
+            </div>
+
+        </div>
+
+    </aside>
+
 </div>
+
+<!-- Bottom CTA -->
+<section class="property-bottom-banner">
+    <div>
+        <span class="section-eyebrow">KEEP EXPLORING</span>
+        <h2>Your next adventure is out there.</h2>
+        <p>Discover another place that feels like home.</p>
+    </div>
+
+    <a asp-controller="Properties"
+       asp-action="Index"
+       class="property-explore-button">
+        Explore more stays <span aria-hidden="true">&rarr;</span>
+    </a>
+</section>
 
 </div>

@@ -49,13 +49,6 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-controller="Home"
-                           asp-action="Privacy">
-                            Privacy
-                        </a>
-                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
@@ -183,11 +176,27 @@
     </main>
 </div>
 
-<footer class="border-top footer text-muted mt-5 py-3">
+<footer class="staybnb-footer">
     <div class="container">
-        &copy; @DateTime.Now.Year - Staybnb -
-        <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="footer-content">
+            <a asp-controller="Home" asp-action="Index" class="footer-brand">
+                Staybnb<span>.</span>
+            </a>
+
+
+        <p class="footer-copyright">
+            &copy; @DateTime.Now.Year Staybnb. All rights reserved.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Privacy"
+           class="footer-privacy">
+            Privacy Policy
+        </a>
     </div>
+</div>
+
+
 </footer>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

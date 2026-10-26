@@ -1,8 +1,329 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+ViewData["Title"] = "Find Your Stay";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="staybnb-home">
+
+<!-- Hero Section -->
+<section class="home-hero">
+    <div class="hero-content">
+        <span class="hero-eyebrow">
+            YOUR NEXT GETAWAY STARTS HERE
+        </span>
+
+        <h1>
+            Find a place<br />
+            to <span>feel at home.</span>
+        </h1>
+
+        <p class="hero-description">
+            Discover comfortable stays, explore new places,
+            and make your next trip one to remember.
+        </p>
+
+        <div class="hero-actions">
+            <a asp-controller="Properties"
+               asp-action="Index"
+               class="btn btn-primary btn-lg">
+                Explore properties
+                <span aria-hidden="true">&rarr;</span>
+            </a>
+
+            <a href="#why-staybnb" class="btn btn-outline-dark btn-lg">
+                Discover Staybnb
+            </a>
+        </div>
+
+        <div class="hero-note">
+            <span class="hero-note-dot"></span>
+            Find your next favourite place to stay.
+        </div>
+    </div>
+
+    <div class="hero-art">
+        <div class="hero-image-frame">
+            <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85"
+                 alt="Warm and modern living room in a holiday accommodation" />
+
+            <div class="hero-image-caption">
+                <div>
+                    <span class="caption-label">YOUR NEXT CHAPTER</span>
+                    <h3>A stay worth remembering.</h3>
+                </div>
+
+                <span class="caption-icon" aria-hidden="true">&nearr;</span>
+            </div>
+        </div>
+
+        <div class="hero-floating-card">
+            <div class="floating-card-icon" aria-hidden="true">♡</div>
+            <div>
+                <strong>Stay somewhere special</strong>
+                <p>Make yourself at home.</p>
+            </div>
+        </div>
+
+        <div class="hero-decoration"></div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="home-search-section" aria-label="Find accommodation">
+    <div class="home-search-heading">
+        <div>
+            <span class="section-eyebrow">START EXPLORING</span>
+            <h2>Where will you go?</h2>
+        </div>
+
+        <span class="search-heading-mark" aria-hidden="true">✳</span>
+    </div>
+
+    <form asp-controller="Properties"
+          asp-action="Index"
+          method="get"
+          class="home-search-form">
+
+        <div class="search-field">
+            <label for="home-city">Destination</label>
+            <input id="home-city"
+                   type="text"
+                   name="city"
+                   placeholder="Which city?" />
+        </div>
+
+        <div class="search-divider"></div>
+
+        <div class="search-field">
+            <label for="home-property-type">Property type</label>
+            <select id="home-property-type" name="propertyType">
+                <option value="">Any type</option>
+                <option value="Apartment">Apartment</option>
+                <option value="House">House</option>
+                <option value="Guesthouse">Guesthouse</option>
+                <option value="Villa">Villa</option>
+            </select>
+        </div>
+
+        <button type="submit" class="search-submit">
+            <span aria-hidden="true">&#9906;</span>
+            Search stays
+        </button>
+    </form>
+
+    <p class="search-footnote">
+        Explore available properties and find a stay that suits you.
+    </p>
+</section>
+
+<!-- Introduction -->
+<section class="home-intro" id="why-staybnb">
+    <div>
+        <span class="section-eyebrow">THE STAYBNB EXPERIENCE</span>
+        <h2>Not just a place to sleep.<br /><span>A place to belong.</span></h2>
+    </div>
+
+    <p>
+        Whether you're planning a weekend escape, visiting a new city,
+        or looking for somewhere to unwind, Staybnb helps you discover
+        accommodation for your next adventure.
+    </p>
+</section>
+
+<!-- Explore Categories -->
+<section class="home-categories">
+    <div class="section-heading">
+        <div>
+            <span class="section-eyebrow">FIND YOUR KIND OF STAY</span>
+            <h2>Something for every journey.</h2>
+        </div>
+
+        <a asp-controller="Properties"
+           asp-action="Index"
+           class="text-link">
+            Explore all stays <span aria-hidden="true">&rarr;</span>
+        </a>
+    </div>
+
+    <div class="category-grid">
+        <a asp-controller="Properties"
+           asp-action="Index"
+           asp-route-propertyType="Apartment"
+           class="category-card category-apartment">
+            <div class="category-number">01 / CITY LIFE</div>
+            <div class="category-content">
+                <h3>City apartments</h3>
+                <p>Your own space in the heart of it all.</p>
+                <span class="category-arrow" aria-hidden="true">&nearr;</span>
+            </div>
+        </a>
+
+        <a asp-controller="Properties"
+           asp-action="Index"
+           asp-route-propertyType="House"
+           class="category-card category-house">
+            <div class="category-number">02 / SLOW LIVING</div>
+            <div class="category-content">
+                <h3>Cosy homes</h3>
+                <p>Room to relax, recharge, and feel at home.</p>
+                <span class="category-arrow" aria-hidden="true">&nearr;</span>
+            </div>
+        </a>
+
+        <a asp-controller="Properties"
+           asp-action="Index"
+           asp-route-propertyType="Guesthouse"
+           class="category-card category-guesthouse">
+            <div class="category-number">03 / GETAWAYS</div>
+            <div class="category-content">
+                <h3>Guesthouses</h3>
+                <p>A welcoming place to make new memories.</p>
+                <span class="category-arrow" aria-hidden="true">&nearr;</span>
+            </div>
+        </a>
+    </div>
+</section>
+@model List<Staybnb.Models.Property>
+
+<!-- Featured Properties -->
+
+<section class="home-featured-properties">
+
+<div class="section-heading">
+    <div>
+        <span class="section-eyebrow">A PLACE TO CALL YOUR OWN</span>
+        <h2>Stays worth discovering.</h2>
+        <p class="featured-subtitle">
+            Explore some of the latest places available on Staybnb.
+        </p>
+    </div>
+
+    <a asp-controller="Properties"
+       asp-action="Index"
+       class="text-link">
+        View all properties <span aria-hidden="true">&rarr;</span>
+    </a>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="featured-empty">
+        <div class="featured-empty-icon" aria-hidden="true">⌂</div>
+        <h3>Your next stay starts here.</h3>
+        <p>
+            There aren't any active properties to feature just yet.
+            Check back soon to discover available stays.
+        </p>
+
+        <a asp-controller="Properties"
+           asp-action="Index"
+           class="btn btn-primary">
+            Explore properties
+        </a>
+    </div>
+}
+else
+{
+    <div class="featured-property-grid">
+
+        @foreach (var property in Model)
+        {
+            var firstImage = property.Images.FirstOrDefault();
+
+            <article class="featured-property-card">
+
+                <a asp-controller="Properties"
+                   asp-action="Details"
+                   asp-route-id="@property.Id"
+                   class="featured-property-image">
+
+                    @if (firstImage != null)
+                    {
+                        <img src="@firstImage.ImagePath"
+                             alt="@property.Title"
+                             loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="featured-image-placeholder">
+                            <span aria-hidden="true">⌂</span>
+                            <span>Staybnb</span>
+                        </div>
+                    }
+
+                    <span class="featured-property-tag">
+                        Available
+                    </span>
+                </a>
+
+                <div class="featured-property-info">
+
+                    <div class="featured-property-location">
+                        <span aria-hidden="true">⌖</span>
+                        @property.City
+                    </div>
+
+                    <h3>
+                        <a asp-controller="Properties"
+                           asp-action="Details"
+                           asp-route-id="@property.Id">
+                            @property.Title
+                        </a>
+                    </h3>
+
+                    <p class="featured-property-type">
+                        @property.PropertyType
+                    </p>
+
+                    <div class="featured-property-bottom">
+                        <div class="featured-property-price">
+                            <strong>
+                                R @property.PricePerNight.ToString("N2")
+                            </strong>
+                            <span>/ night</span>
+                        </div>
+
+                        <a asp-controller="Properties"
+                           asp-action="Details"
+                           asp-route-id="@property.Id"
+                           class="featured-property-arrow"
+                           aria-label="View @property.Title">
+                            &rarr;
+                        </a>
+                    </div>
+
+                </div>
+            </article>
+        }
+
+    </div>
+}
+
+</section>
+
+
+<!-- Host Call to Action -->
+<section class="home-host-cta">
+    <div class="host-cta-decoration" aria-hidden="true">S.</div>
+
+    <div class="host-cta-content">
+        <span class="section-eyebrow">OPEN YOUR DOORS</span>
+        <h2>Your space could be<br />someone's next adventure.</h2>
+        <p>
+            Turn your property into a welcoming destination.
+            Apply to become a Staybnb host and share your space with travellers.
+        </p>
+
+        <a asp-controller="HostApplications"
+           asp-action="Create"
+           class="btn btn-dark btn-lg">
+            Become a host <span aria-hidden="true">&rarr;</span>
+        </a>
+    </div>
+
+    <div class="host-cta-side">
+        <span class="host-cta-symbol" aria-hidden="true">↗</span>
+        <p>Good spaces.<br />Great stories.</p>
+    </div>
+</section>
+
 </div>

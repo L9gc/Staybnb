@@ -4,24 +4,34 @@
 @{
 ViewData["Title"] = "My Bookings";
 var currency = CultureInfo.GetCultureInfo("en-ZA");
+var bookings = Model.ToList();
+var totalBookings = bookings.Count;
+var approvedBookings = bookings.Count(b => b.Status == "Approved");
+var pendingBookings = bookings.Count(b => b.Status == "Pending");
 }
 
-<div class="container py-5">
-    <div class="mb-5">
-        <p class="text-uppercase text-muted fw-semibold small mb-2">
-            Your reservations
-        </p>
+<div class="my-bookings-page">
 
-    <h1 class="display-5 fw-bold">My Bookings</h1>
+<!-- Header -->
+<section class="my-bookings-header">
+    <div>
+        <span class="section-eyebrow">YOUR STAYBNB JOURNEY</span>
+        <h1>My <span>Bookings.</span></h1>
+        <p>All your reservations, organised in one place.</p>
+    </div>
 
-    <p class="text-muted">
-        View your reservation history and current booking statuses.
-    </p>
-</div>
+    <a asp-controller="Properties"
+       asp-action="Index"
+       class="my-bookings-explore-button">
+        Find your next stay <span aria-hidden="true">&rarr;</span>
+    </a>
+</section>
 
+<!-- Feedback -->
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show mb-4"
+         role="alert">
         @TempData["Message"]
 
         <button type="button"
@@ -32,132 +42,250 @@ var currency = CultureInfo.GetCultureInfo("en-ZA");
     </div>
 }
 
-@if (!Model.Any())
-{
-    <div class="text-center border rounded-4 py-5">
-        <h2 class="h4 fw-bold">No bookings yet</h2>
+<!-- Summary -->
+<section class="booking-summary-grid">
 
-        <p class="text-muted">
-            Your reservations will appear here when you make a booking.
-        </p>
-
-        <a asp-controller="Properties"
-           asp-action="Index"
-           class="btn btn-dark">
-            Explore Properties
-        </a>
-    </div>
-}
-else
-{
-    <div class="row g-4">
-    @foreach (var booking in Model)
-    {
-        <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-md-row
-                                justify-content-between gap-3">
-
-                    <div>
-                        <h2 class="h5 fw-bold">
-                            @(booking.Property?.Title ?? "Property unavailable")
-                        </h2>
-
-                        <p class="text-muted mb-2">
-                            @(booking.Property?.City ?? "Unknown location")
-                        </p>
-
-                        <p class="mb-1">
-                            <strong>Check-in:</strong>
-                            @booking.CheckInDate.ToString("dd MMM yyyy")
-                        </p>
-
-                        <p class="mb-1">
-                            <strong>Check-out:</strong>
-                            @booking.CheckOutDate.ToString("dd MMM yyyy")
-                        </p>
-
-                        <p class="mb-3">
-                            <strong>Guests:</strong>
-                            @booking.NumberOfGuests
-                        </p>
-
-                        @if (booking.Status == "Pending")
-                        {
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                <form asp-controller="Host"
-                                      asp-action="ApproveBooking"
-                                      asp-route-id="@booking.Id"
-                                      method="post">
-
-                                    @Html.AntiForgeryToken()
-
-                                    <button type="submit"
-                                            class="btn btn-success btn-sm">
-                                        Approve Booking
-                                    </button>
-                                </form>
-
-                                <form asp-controller="Host"
-                                      asp-action="RejectBooking"
-                                      asp-route-id="@booking.Id"
-                                      method="post">
-
-                                    @Html.AntiForgeryToken()
-
-                                    <button type="submit"
-                                            class="btn btn-danger btn-sm">
-                                        Reject Booking
-                                    </button>
-                                </form>
-                            </div>
-                        }
-
-                        @if (booking.Status == "Approved")
-                        {
-                            <a asp-controller="Bookings"
-                               asp-action="UploadDocument"
-                               asp-route-id="@booking.Id"
-                               class="btn btn-outline-primary btn-sm">
-                                Upload Documents
-                            </a>
-                        }
-                    </div>
-
-                    <div class="text-md-end">
-                        <span class="badge @(booking.Status == "Approved"
-                            ? "bg-success"
-                            : booking.Status == "Rejected"
-                                ? "bg-danger"
-                                : booking.Status == "Cancelled"
-                                    ? "bg-secondary"
-                                    : "bg-warning text-dark")">
-                            @booking.Status
-                        </span>
-
-                        <p class="text-muted small mt-3 mb-1">
-                            BOOKING TOTAL
-                        </p>
-
-                        <p class="fs-4 fw-bold">
-                            @booking.TotalPrice.ToString("C", currency)
-                        </p>
-
-                        <p class="text-muted small mb-0">
-                            Booked on @booking.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
-                        </p>
-                    </div>
-
-                </div>
-            </div>
+    <div class="booking-summary-card">
+        <div class="booking-summary-icon booking-icon-salmon"
+             aria-hidden="true">▤</div>
+        <div>
+            <span>Total reservations</span>
+            <strong>@totalBookings</strong>
         </div>
     </div>
-}
 
-</div>
+    <div class="booking-summary-card">
+        <div class="booking-summary-icon booking-icon-green"
+             aria-hidden="true">✓</div>
+        <div>
+            <span>Approved bookings</span>
+            <strong>@approvedBookings</strong>
+        </div>
+    </div>
 
-}
+    <div class="booking-summary-card">
+        <div class="booking-summary-icon booking-icon-yellow"
+             aria-hidden="true">◷</div>
+        <div>
+            <span>Awaiting approval</span>
+            <strong>@pendingBookings</strong>
+        </div>
+    </div>
 
+</section>
+
+<!-- Booking List -->
+<section class="my-bookings-list-section">
+
+    <div class="my-bookings-list-heading">
+        <div>
+            <span class="section-eyebrow">YOUR RESERVATIONS</span>
+            <h2>Booking history</h2>
+        </div>
+
+        <span class="booking-count-badge">
+            @totalBookings @(totalBookings == 1 ? "booking" : "bookings")
+        </span>
+    </div>
+
+    @if (!bookings.Any())
+    {
+        <div class="my-bookings-empty">
+            <div class="my-bookings-empty-icon" aria-hidden="true">⌂</div>
+
+            <span class="section-eyebrow">YOUR NEXT CHAPTER STARTS HERE</span>
+
+            <h3>No bookings just yet.</h3>
+
+            <p>
+                Once you reserve a property, your booking details and
+                reservation status will appear here.
+            </p>
+
+            <a asp-controller="Properties"
+               asp-action="Index"
+               class="my-bookings-primary-button">
+                Explore properties <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="my-bookings-list">
+
+            @foreach (var booking in bookings)
+            {
+                var propertyTitle = booking.Property?.Title ?? "Property unavailable";
+                var propertyCity = booking.Property?.City ?? "Unknown location";
+
+                var statusClass = booking.Status switch
+                {
+                    "Approved" => "booking-status-approved",
+                    "Rejected" => "booking-status-rejected",
+                    "Cancelled" => "booking-status-cancelled",
+                    "Pending" => "booking-status-pending",
+                    _ => "booking-status-default"
+                };
+
+                var nights = (booking.CheckOutDate.Date - booking.CheckInDate.Date).Days;
+
+                <article class="my-booking-card">
+
+                    <!-- Property Image -->
+                    <div class="my-booking-image">
+                        @if (booking.Property?.Images?.FirstOrDefault() is { } image)
+                        {
+                            <img src="@image.ImagePath"
+                                 alt="@propertyTitle"
+                                 loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="my-booking-image-placeholder">
+                                <span aria-hidden="true">⌂</span>
+                                <span>STAYBNB</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Main Information -->
+                    <div class="my-booking-main">
+
+                        <div class="my-booking-title-row">
+                            <div>
+                                <span class="my-booking-location">
+                                    <span aria-hidden="true">⌖</span>
+                                    @propertyCity
+                                    @if (booking.Property != null)
+                                    {
+                                        <span>· @booking.Property.PropertyType</span>
+                                    }
+                                </span>
+
+                                <h3>@propertyTitle</h3>
+                            </div>
+
+                            <span class="booking-status-badge @statusClass">
+                                <span class="booking-status-dot"></span>
+                                @booking.Status
+                            </span>
+                        </div>
+
+                        <div class="my-booking-dates">
+
+                            <div class="my-booking-date-item">
+                                <span>CHECK-IN</span>
+                                <strong>@booking.CheckInDate.ToString("dd MMM yyyy")</strong>
+                            </div>
+
+                            <div class="my-booking-date-arrow" aria-hidden="true">
+                                &rarr;
+                            </div>
+
+                            <div class="my-booking-date-item">
+                                <span>CHECK-OUT</span>
+                                <strong>@booking.CheckOutDate.ToString("dd MMM yyyy")</strong>
+                            </div>
+
+                        </div>
+
+                        <div class="my-booking-meta">
+                            <span>
+                                <strong>@booking.NumberOfGuests</strong>
+                                @(booking.NumberOfGuests == 1 ? "guest" : "guests")
+                            </span>
+
+                            @if (nights > 0)
+                            {
+                                <span>
+                                    <strong>@nights</strong>
+                                    @(nights == 1 ? "night" : "nights")
+                                </span>
+                            }
+
+                            <span>
+                                Booked @booking.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="my-booking-actions">
+
+                            @if (booking.Property != null)
+                            {
+                                <a asp-controller="Properties"
+                                   asp-action="Details"
+                                   asp-route-id="@booking.PropertyId"
+                                   class="my-booking-secondary-button">
+                                    View property <span aria-hidden="true">&rarr;</span>
+                                </a>
+                            }
+
+                            @if (booking.Status == "Approved")
+                            {
+                                <a asp-controller="Bookings"
+                                   asp-action="UploadDocument"
+                                   asp-route-id="@booking.Id"
+                                   class="my-booking-primary-button">
+                                    Upload documents <span aria-hidden="true">&uarr;</span>
+                                </a>
+
+                                <a asp-controller="Bookings"
+                                   asp-action="CheckInInstructions"
+                                   asp-route-id="@booking.Id"
+                                   class="my-booking-secondary-button">
+                                    Check-in instructions
+                                </a>
+                            }
+                            else if (booking.Status == "Pending")
+                            {
+                                <span class="my-booking-pending-note">
+                                    Your reservation is awaiting host approval.
+                                </span>
+                            }
+                            else if (booking.Status == "Rejected")
+                            {
+                                <span class="my-booking-status-note">
+                                    This booking was not approved.
+                                </span>
+                            }
+                            else if (booking.Status == "Cancelled")
+                            {
+                                <span class="my-booking-status-note">
+                                    This booking has been cancelled.
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <!-- Price -->
+                    <aside class="my-booking-price-panel">
+                        <span class="my-booking-price-label">BOOKING TOTAL</span>
+
+                        <strong class="my-booking-total">
+                            @booking.TotalPrice.ToString("C", currency)
+                        </strong>
+
+                        <span class="my-booking-price-caption">
+                            @if (nights > 0)
+                            {
+                                <text>@nights @(nights == 1 ? "night" : "nights") including fees</text>
+                            }
+                            else
+                            {
+                                <text>Including applicable fees</text>
+                            }
+                        </span>
+                    </aside>
+
+                </article>
+            }
+
+        </div>
+    }
+
+</section>
 
 </div>

@@ -1,33 +1,65 @@
 @{
-    ViewData["Title"] = "Access Denied";
+ViewData["Title"] = "Access Denied";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6 text-center">
+<div class="access-denied-page">
+    <div class="container">
+        <div class="access-denied-card">
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-5">
-
-                    <h1 class="display-4 fw-bold">403</h1>
-
-                    <h2 class="h4 mb-3">Access Denied</h2>
-
-                    <p class="text-muted mb-4">
-                        You don't have permission to access this page.
-                        Please return to the homepage or sign in with
-                        an account that has the required permissions.
-                    </p>
-
-                    <a asp-controller="Home"
-                       asp-action="Index"
-                       class="btn btn-dark">
-                        Return Home
-                    </a>
-
-                </div>
-            </div>
-
+        <div class="access-denied-icon">
+            <i class="bi bi-shield-lock"></i>
         </div>
+
+        <span class="access-denied-code">ERROR 403</span>
+
+        <h1>Access Denied</h1>
+
+        <p class="access-denied-description">
+            You don't have permission to access this page.
+            Your account may not have the required role or permissions
+            to view this resource.
+        </p>
+
+        <div class="access-denied-notice">
+            <i class="bi bi-info-circle"></i>
+            <span>
+                If you believe this is a mistake, contact the platform
+                administrator for assistance.
+            </span>
+        </div>
+
+        <div class="access-denied-actions">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="btn btn-primary">
+                <i class="bi bi-house-door"></i>
+                Return Home
+            </a>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Continue Browsing
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="btn btn-outline-secondary">
+                    Sign In
+                </a>
+            }
+        </div>
+
+        <div class="access-denied-footer">
+            <i class="bi bi-shield-check"></i>
+            Staybnb protects restricted pages and account information.
+        </div>
+
     </div>
+</div>
+
 </div>

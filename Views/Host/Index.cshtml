@@ -1,0 +1,157 @@
+@model List<Staybnb.Models.Property>
+
+@{
+ViewData["Title"] = "Host Dashboard";
+}
+
+<div class="container mt-4 mb-5">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Host Dashboard</h1>
+        <p class="text-muted">
+            Manage your property listings and availability.
+        </p>
+    </div>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">My Properties</h5>
+        <p class="card-text">
+            Total listings: <strong>@Model.Count</strong>
+        </p>
+        <p class="card-text">
+            Active listings:
+            <strong>@Model.Count(p => p.IsActive)</strong>
+        </p>
+        <p class="card-text">
+            Inactive listings:
+            <strong>@Model.Count(p => !p.IsActive)</strong>
+        </p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">
+        <h5>No properties found</h5>
+        <p class="mb-0">
+            You don't have any property listings associated with your account yet.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var property in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+
+                <div class="card h-100 shadow-sm">
+
+                    @if (property.Images != null && property.Images.Any())
+                    {
+                        <img src="@property.Images.First().ImagePath"
+                             class="card-img-top"
+                             alt="@property.Title"
+                             style="height: 220px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center"
+                             style="height: 220px;">
+                            <span class="text-muted">No image available</span>
+                        </div>
+                    }
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+
+                            <h5 class="card-title mb-0">
+                                @property.Title
+                            </h5>
+
+                            @if (property.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+
+                        </div>
+
+                        <p class="text-muted mb-2">
+                            @property.City
+                        </p>
+
+                        <p class="card-text">
+                            @property.Description
+                        </p>
+
+                        <h5 class="mb-3">
+                            R @property.PricePerNight.ToString("N2")
+                            <small class="text-muted fs-6">/ night</small>
+                        </h5>
+
+                        <p class="small text-muted">
+                            Property type: @property.PropertyType
+                        </p>
+
+                        <a asp-controller="Properties"
+                           asp-action="Details"
+                           asp-route-id="@property.Id"
+                           class="btn btn-outline-primary btn-sm">
+                            View Property
+                        </a>
+
+                        <form asp-controller="Host"
+                              asp-action="ToggleListing"
+                              asp-route-id="@property.Id"
+                              method="post"
+                              class="mt-3">
+
+                            @Html.AntiForgeryToken()
+
+                            @if (property.IsActive)
+                            {
+                                <button type="submit"
+                                        class="btn btn-danger w-100">
+                                    Deactivate Listing
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit"
+                                        class="btn btn-success w-100">
+                                    Activate Listing
+                                </button>
+                            }
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+</div>

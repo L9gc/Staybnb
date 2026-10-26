@@ -1,0 +1,202 @@
+@model List<Staybnb.Models.Booking>
+
+@{
+ViewData["Title"] = "Manage Bookings";
+}
+
+<div class="container mt-4 mb-5">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Manage Bookings</h1>
+        <p class="text-muted">
+            Review and manage reservations for your properties.
+        </p>
+    </div>
+
+    <a asp-controller="Host"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+@{
+    var pendingBookings = Model.Count(b => b.Status == "Pending");
+    var approvedBookings = Model.Count(b => b.Status == "Approved");
+    var rejectedBookings = Model.Count(b => b.Status == "Rejected");
+}
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Pending Requests</h6>
+                <h3>@pendingBookings</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Approved Bookings</h6>
+                <h3>@approvedBookings</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Rejected Bookings</h6>
+                <h3>@rejectedBookings</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">
+        <h5>No bookings yet</h5>
+        <p class="mb-0">
+            Booking requests for your properties will appear here.
+        </p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Property</th>
+                    <th>Guest</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Guests</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var booking in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>
+                                @(booking.Property?.Title ?? "Unknown property")
+                            </strong>
+                        </td>
+
+                        <td>
+                            @(booking.Guest?.FullName ?? "Unknown guest")
+                        </td>
+
+                        <td>
+                            @booking.CheckInDate.ToString("dd MMM yyyy")
+                        </td>
+
+                        <td>
+                            @booking.CheckOutDate.ToString("dd MMM yyyy")
+                        </td>
+
+                        <td>
+                            @booking.NumberOfGuests
+                        </td>
+
+                        <td>
+                            R @booking.TotalPrice.ToString("N2")
+                        </td>
+
+                        <td>
+                            @switch (booking.Status)
+                            {
+                                case "Pending":
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    break;
+
+                                case "Approved":
+                                    <span class="badge bg-success">Approved</span>
+                                    break;
+
+                                case "Rejected":
+                                    <span class="badge bg-danger">Rejected</span>
+                                    break;
+
+                                case "Cancelled":
+                                    <span class="badge bg-secondary">Cancelled</span>
+                                    break;
+
+                                default:
+                                    <span class="badge bg-secondary">@booking.Status</span>
+                                    break;
+                            }
+                        </td>
+
+                        <td>
+                            @if (booking.Status == "Pending")
+                            {
+                                <div class="d-flex gap-2">
+
+                                    <form asp-controller="Host"
+                                          asp-action="ApproveBooking"
+                                          asp-route-id="@booking.Id"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm">
+                                            Approve
+                                        </button>
+                                    </form>
+
+                                    <form asp-controller="Host"
+                                          asp-action="RejectBooking"
+                                          asp-route-id="@booking.Id"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            Reject
+                                        </button>
+                                    </form>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No actions available</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+}
+
+</div>

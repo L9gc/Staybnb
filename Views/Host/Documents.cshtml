@@ -1,0 +1,144 @@
+@model List<Staybnb.Models.GuestDocument>
+
+@{
+ViewData["Title"] = "Guest Documents";
+}
+
+<div class="container mt-4 mb-5">
+
+<div class="mb-4">
+    <h1>Guest Documents</h1>
+    <p class="text-muted">
+        Review identification documents submitted for bookings at your properties.
+    </p>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">
+        <h5>No documents uploaded yet</h5>
+        <p class="mb-0">
+            Guest identification documents will appear here when they are uploaded.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var document in Model)
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex flex-column flex-md-row
+                                    justify-content-between gap-3">
+
+                            <div>
+                                <h5 class="fw-bold">
+                                    @(document.Booking?.Property?.Title
+                                        ?? "Property unavailable")
+                                </h5>
+
+                                <p class="text-muted mb-2">
+                                    Guest:
+                                    @(document.Booking?.Guest?.FullName
+                                        ?? "Unknown guest")
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Document type:</strong>
+                                    @document.DocumentType
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Uploaded:</strong>
+                                    @document.UploadedAt.ToLocalTime()
+                                        .ToString("dd MMM yyyy")
+                                </p>
+
+                                <p class="mb-3">
+                                    <strong>Booking ID:</strong>
+                                    @document.BookingId
+                                </p>
+
+                                <p class="mb-0">
+                                    <strong>Stored file:</strong>
+                                    @System.IO.Path.GetFileName(document.FilePath)
+                                </p>
+                            </div>
+
+                            <div class="text-md-end">
+
+                                @if (document.IsVerified)
+                                {
+                                    <span class="badge bg-success">
+                                        Verified
+                                    </span>
+
+                                    @if (document.VerifiedAt.HasValue)
+                                    {
+                                        <p class="text-muted small mt-2">
+                                            Verified on
+                                            @document.VerifiedAt.Value
+                                                .ToLocalTime()
+                                                .ToString("dd MMM yyyy")
+                                        </p>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Awaiting verification
+                                    </span>
+
+                                    <form asp-controller="Host"
+                                          asp-action="VerifyDocument"
+                                          asp-route-id="@document.Id"
+                                          method="post"
+                                          class="mt-3">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-success">
+                                            Mark as Verified
+                                        </button>
+                                    </form>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-controller="Host"
+       asp-action="Bookings"
+       class="btn btn-outline-secondary">
+        Back to Bookings
+    </a>
+</div>
+
+</div>

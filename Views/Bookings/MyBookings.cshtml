@@ -19,6 +19,19 @@ var currency = CultureInfo.GetCultureInfo("en-ZA");
     </p>
 </div>
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
 @if (!Model.Any())
 {
     <div class="text-center border rounded-4 py-5">
@@ -38,67 +51,113 @@ var currency = CultureInfo.GetCultureInfo("en-ZA");
 else
 {
     <div class="row g-4">
-        @foreach (var booking in Model)
-        {
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex flex-column flex-md-row
-                                    justify-content-between gap-3">
+    @foreach (var booking in Model)
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row
+                                justify-content-between gap-3">
 
-                            <div>
-                                <h2 class="h5 fw-bold">
-                                    @(booking.Property?.Title ?? "Property unavailable")
-                                </h2>
+                    <div>
+                        <h2 class="h5 fw-bold">
+                            @(booking.Property?.Title ?? "Property unavailable")
+                        </h2>
 
-                                <p class="text-muted mb-2">
-                                    @(booking.Property?.City ?? "Unknown location")
-                                </p>
+                        <p class="text-muted mb-2">
+                            @(booking.Property?.City ?? "Unknown location")
+                        </p>
 
-                                <p class="mb-1">
-                                    <strong>Check-in:</strong>
-                                    @booking.CheckInDate.ToString("dd MMM yyyy")
-                                </p>
+                        <p class="mb-1">
+                            <strong>Check-in:</strong>
+                            @booking.CheckInDate.ToString("dd MMM yyyy")
+                        </p>
 
-                                <p class="mb-1">
-                                    <strong>Check-out:</strong>
-                                    @booking.CheckOutDate.ToString("dd MMM yyyy")
-                                </p>
+                        <p class="mb-1">
+                            <strong>Check-out:</strong>
+                            @booking.CheckOutDate.ToString("dd MMM yyyy")
+                        </p>
 
-                                <p class="mb-0">
-                                    <strong>Guests:</strong>
-                                    @booking.NumberOfGuests
-                                </p>
+                        <p class="mb-3">
+                            <strong>Guests:</strong>
+                            @booking.NumberOfGuests
+                        </p>
+
+                        @if (booking.Status == "Pending")
+                        {
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <form asp-controller="Host"
+                                      asp-action="ApproveBooking"
+                                      asp-route-id="@booking.Id"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm">
+                                        Approve Booking
+                                    </button>
+                                </form>
+
+                                <form asp-controller="Host"
+                                      asp-action="RejectBooking"
+                                      asp-route-id="@booking.Id"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm">
+                                        Reject Booking
+                                    </button>
+                                </form>
                             </div>
+                        }
 
-                            <div class="text-md-end">
-                                <span class="badge @(booking.Status == "Confirmed"
-                                    ? "bg-success"
-                                    : booking.Status == "Cancelled"
-                                        ? "bg-danger"
-                                        : "bg-warning text-dark")">
-                                    @booking.Status
-                                </span>
-
-                                <p class="text-muted small mt-3 mb-1">
-                                    BOOKING TOTAL
-                                </p>
-
-                                <p class="fs-4 fw-bold">
-                                    @booking.TotalPrice.ToString("C", currency)
-                                </p>
-
-                                <p class="text-muted small mb-0">
-                                    Booked on @booking.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
-                                </p>
-                            </div>
-
-                        </div>
+                        @if (booking.Status == "Approved")
+                        {
+                            <a asp-controller="Bookings"
+                               asp-action="UploadDocument"
+                               asp-route-id="@booking.Id"
+                               class="btn btn-outline-primary btn-sm">
+                                Upload Documents
+                            </a>
+                        }
                     </div>
+
+                    <div class="text-md-end">
+                        <span class="badge @(booking.Status == "Approved"
+                            ? "bg-success"
+                            : booking.Status == "Rejected"
+                                ? "bg-danger"
+                                : booking.Status == "Cancelled"
+                                    ? "bg-secondary"
+                                    : "bg-warning text-dark")">
+                            @booking.Status
+                        </span>
+
+                        <p class="text-muted small mt-3 mb-1">
+                            BOOKING TOTAL
+                        </p>
+
+                        <p class="fs-4 fw-bold">
+                            @booking.TotalPrice.ToString("C", currency)
+                        </p>
+
+                        <p class="text-muted small mb-0">
+                            Booked on @booking.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                        </p>
+                    </div>
+
                 </div>
             </div>
-        }
+        </div>
     </div>
 }
+
+</div>
+
+}
+
 
 </div>

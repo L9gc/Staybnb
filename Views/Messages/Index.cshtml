@@ -1,0 +1,85 @@
+@model List<Staybnb.Models.Message>
+
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Inbox</h1>
+            <p class="text-muted">Messages you've received on Staybnb.</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            Compose Message
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-outline-primary active">
+            Inbox
+        </a>
+
+        <a asp-action="Sent" class="btn btn-outline-secondary">
+            Sent Messages
+        </a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h4>Your inbox is empty</h4>
+                <p class="text-muted">
+                    Messages from other Staybnb users will appear here.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="list-group shadow-sm">
+            @foreach (var message in Model)
+            {
+                <a asp-action="Details"
+                   asp-route-id="@message.Id"
+                   class="list-group-item list-group-item-action
+                          @(message.IsRead ? "" : "fw-bold")">
+
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-1">
+                            @message.Subject
+                        </h5>
+
+                        <small class="text-muted">
+                            @message.SentAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                        </small>
+                    </div>
+
+                    <p class="mb-1">
+                        From: @(message.Sender?.FullName ?? message.Sender?.Email ?? "Unknown user")
+                    </p>
+
+                    <small class="text-muted">
+                        @(message.Content.Length > 100
+                            ? message.Content[..100] + "..."
+                            : message.Content)
+                    </small>
+
+                    @if (!message.IsRead)
+                    {
+                        <span class="badge bg-primary ms-2">New</span>
+                    }
+                </a>
+            }
+        </div>
+    }
+</div>

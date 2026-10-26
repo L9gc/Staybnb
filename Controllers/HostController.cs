@@ -235,4 +235,58 @@ public async Task<IActionResult> CheckInSettings(CheckInProcessViewModel model)
 
     return RedirectToAction(nameof(CheckInSettings), new { id = property.Id });
 }
+// Display documents uploaded for bookings belonging to this host.
+[HttpGet]
+public async Task<IActionResult> Documents()
+{
+    var hostId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var documents = await _context.GuestDocuments
+        .AsNoTracking()
+        .Include(d => d.Booking)
+            .ThenInclude(b => b.Property)
+        .Include(d => d.Booking)
+            .ThenInclude(b => b.Guest)
+        .Where(d => d.Booking.Property.HostId == hostId)
+        .OrderByDescending(d => d.UploadedAt)
+        .ToListAsync();
+
+    return View(documents);
+}
+
+// Mark a guest document as verified.
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> VerifyDocument(int id)
+{
+    var hostId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var document = await _context.GuestDocuments
+        .Include(d => d.Booking)
+            .ThenInclude(b => b.Property)
+        .FirstOrDefaultAsync(d =>
+            d.Id == id &&
+            d.Booking.Property.HostId == hostId);
+
+    if (document == null)
+    {
+        return NotFound();
+    }
+
+    if (document.IsVerified)
+    {
+        TempData["Message"] = "This document has already been verified.";
+        return RedirectToAction(nameof(Documents));
+    }
+
+    document.IsVerified = true;
+    document.VerifiedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    TempData["Message"] = "Document verified successfully.";
+
+    return RedirectToAction(nameof(Documents));
+}
+
 }

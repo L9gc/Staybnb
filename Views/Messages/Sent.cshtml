@@ -1,0 +1,83 @@
+@model List<Staybnb.Models.Message>
+
+@{
+    ViewData["Title"] = "Sent Messages";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Sent Messages</h1>
+            <p class="text-muted">
+                View messages you've sent to other Staybnb users.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            Compose Message
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Inbox
+        </a>
+
+        <a asp-action="Sent" class="btn btn-outline-primary active">
+            Sent Messages
+        </a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h4>No sent messages</h4>
+
+                <p class="text-muted">
+                    Messages you send will appear here.
+                </p>
+
+                <a asp-action="Create" class="btn btn-primary">
+                    Send Your First Message
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="list-group shadow-sm">
+            @foreach (var message in Model)
+            {
+                <a asp-action="Details"
+                   asp-route-id="@message.Id"
+                   class="list-group-item list-group-item-action">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-1">
+                            @message.Subject
+                        </h5>
+
+                        <small class="text-muted">
+                            @message.SentAt.ToLocalTime()
+                                .ToString("dd MMM yyyy HH:mm")
+                        </small>
+                    </div>
+
+                    <p class="mb-1">
+                        To:
+                        @(message.Receiver?.FullName
+                            ?? message.Receiver?.Email
+                            ?? "Unknown user")
+                    </p>
+
+                    <small class="text-muted">
+                        @(message.Content.Length > 100
+                            ? message.Content[..100] + "..."
+                            : message.Content)
+                    </small>
+                </a>
+            }
+        </div>
+    }
+</div>
